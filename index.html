@@ -154,6 +154,7 @@
       <p>Function expressions can actually be seen quite often. A common pattern in web development is to &#8220;fork&#8221; function definitions based on some kind of a feature test, allowing for the best performance. Since such forking usually happens in the same scope, it is almost always necessary to use function expressions. After all, as we know by now, function declarations should not be executed conditionally:</p>
 
 <pre lang="javascript" class="prettyprint">
+  // `contains` is part of "APE Javascript library" (http://dhtmlkitchen.com/ape/) by Garrett Smith
   var contans = (function() {
     var docEl = document.documentElement;
 
