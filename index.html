@@ -76,6 +76,34 @@
     function bar(){}; // declaration, since it's part of a <em>FunctionBody</em>
   })();
 </pre>
+    
+<p>A somewhat less obvious example of function expression is the one where function is wrapped with parenthesis - <code>(function foo(){})</code>. The reason it is an expression is again due to a context: "(" and ")" constitute a grouping operator and grouping operator can only contain an expression:</p>
+      
+<p>To demonstrate with examples:</p>
+      
+<pre lang="javascript" class="prettyprint">
+  
+  function foo(){}; // function declaration
+  (function foo(){}); // function expression: due to grouping operator
+  
+  try {
+    (var x = 5); // grouping operator can only contain expression, not a statement (which `var` is)
+  } catch(err) {
+    // SyntaxError
+  }
+</pre>
+      
+<p>You might also recall that when evaluating JSON with <code>eval</code>, the string is usually wrapped with parenthesis - <code>eval('(' + json + ')')</code>. This is of course done for the same reason - grouping operator, which parenthesis are, forces JSON brackets to be parsed as expression rather than as a block:</p>
+      
+<pre lang="javascript" class="prettyprint">
+  try {
+    { "x": 5 }; // "{" and "}" are parsed as a block
+  } catch(err) {
+    // SyntaxError
+  }
+  
+  ({ "x": 5 }); // grouping operator forces "{" and "}" to be parsed as object literal
+</pre>
 
       <p>There&#8217;s a subtle difference in behavior of declarations and expressions.</p>
 
