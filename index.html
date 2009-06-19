@@ -547,6 +547,12 @@
   })();
 
   setTimeout(function f(){ }, 100); // fails
+  
+  Person.prototype = {
+    say: function say() { ... } // fails
+  }
+  
+  Person.prototype.say = function say(){ ... }; // works
 </pre>
 
       <p>It also means that we can&#8217;t use such common pattern as returning named function expression without an assignment:</p>
