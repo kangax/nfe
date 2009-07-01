@@ -756,7 +756,7 @@
   })();
 </pre>
 
-      <p>While it&#8217;s an elegant approach, it has its own drawbacks. First, by using different identifiers, you loose naming consistency. Whether it&#8217;s good or bad thing is not very clear. Some might prefer to have identical names, while others wouldn&#8217;t mind varying ones; after all, different names can often &#8220;speak&#8221; about implementation used. For example, seeing &#8220;attachEvent&#8221; in debugger, would let you know that it is an <code>attachEvent</code>-based implementation of <code>addEvent</code>. On the other hand, implementation-related name might not be meaningful at all. If you&#8217;re providing an API and name &#8220;inner&#8221; functions in such way, the user of API could easily get lost in all of these implementation details. </p>
+      <p>While it&#8217;s an elegant approach, it has its own drawbacks. First, by using different identifiers, you lose naming consistency. Whether it&#8217;s good or bad thing is not very clear. Some might prefer to have identical names, while others wouldn&#8217;t mind varying ones; after all, different names can often &#8220;speak&#8221; about implementation used. For example, seeing &#8220;attachEvent&#8221; in debugger, would let you know that it is an <code>attachEvent</code>-based implementation of <code>addEvent</code>. On the other hand, implementation-related name might not be meaningful at all. If you&#8217;re providing an API and name &#8220;inner&#8221; functions in such way, the user of API could easily get lost in all of these implementation details. </p>
 
       <p>A solution to this problem might be to employ different naming convention. Just be careful not to introduce extra verbosity. Some alternatives that come to mind are:</p>
 
