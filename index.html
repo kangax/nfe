@@ -151,6 +151,8 @@
   foo();
 </pre>
 
+      <p>To explain in more detail: function declarations are only allowed to appear in <em>Program</em> or <em>FunctionBody</em>. Syntactically, they <strong>can not appear in <em>Block</em></strong> — such as that of <code>if</code>, <code>while</code> or <code>for</code> statements. Because of these restrictions, whenever function appears in a block (such as in previous example) it should actually be <strong>considered a syntax error</strong>, not function declaration or expression. The problem is that none of the implementations I've seen parse these functions per rules. Instead, they allow and interpret them in proprietary ways. Interestingly, specification allows implementations to introduce syntax extensions (see section 16), so these function syntax deviations are very much conforming.</p>
+
       <p>Function expressions can actually be seen quite often. A common pattern in web development is to &#8220;fork&#8221; function definitions based on some kind of a feature test, allowing for the best performance. Since such forking usually happens in the same scope, it is almost always necessary to use function expressions. After all, as we know by now, function declarations should not be executed conditionally:</p>
 
 <pre lang="javascript" class="prettyprint">
