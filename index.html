@@ -34,6 +34,7 @@
         <li><a href="#safari-bug">Safari bug</a></li>
         <li><a href="#solution">Solution</a></li>
         <li><a href="#alt-solution">Alternative solution</a></li>
+        <li><a href="#webkit-displayName">WebKit's displayName</a></li>
         <li><a href="#future-considerations">Future considerations</a></li>
         <li><a href="#credits">Credits</a></li>
       </ol>
@@ -755,6 +756,10 @@
       <p>Another minor issue with this pattern is increased memory consumption. By defining all of the function variations upfront, you implicitly create N-1 unused functions. As you can see, if <code>attachEvent</code> is found in <code>document.documentElement</code>, then neither <code>addEventListener</code> nor <code>addEventAsProperty</code> are ever really used. Yet, they already consume memory; memory which is never deallocated for the same reason as with JScript&#8217;s buggy named expressions — both functions are &#8220;trapped&#8221; in a closure of returning one. </p>
 
       <p>This increased consumption is of course hardly an issue. If a library such as Prototype.js was to use this pattern, there would be not more than 100-200 extra function objects created. As long as functions are not created in such way repeatedly (at runtime) but only once (at load time), you probably shouldn&#8217;t worry about it.</p>
+      
+      <h2 id="webkit-displayName">WebKit's displayName</h2>
+      
+      <p>A somewhat different approach was taken by WebKit team. Frustrated with poor representation of functions — both, anonymous and named — WebKit introduced "special" <code>displayName</code> property (essentially a string) that when assigned to a function is displayed in debugger/profiler in place of that function's "name". <a href="http://www.alertdebugging.com/2009/04/29/building-a-better-javascript-profiler-with-webkit/">Francisco Tolmasky explains in details</a> the rationale and implementation of this solution.</p>
       
       <h2 id="future-considerations">Future considerations</h2>
       

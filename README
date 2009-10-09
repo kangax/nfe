@@ -1,6 +1,5 @@
 TODO:
 
-  - Mention WebKit's `displayName`
   - Explain Spidermonkey's function statements
   - Explain `f = function f(){ ... }` memory usage
   - Add link to Cornford/Yep discussion from '03
