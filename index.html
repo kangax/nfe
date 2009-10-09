@@ -34,6 +34,7 @@
         <li><a href="#safari-bug">Safari bug</a></li>
         <li><a href="#solution">Solution</a></li>
         <li><a href="#alt-solution">Alternative solution</a></li>
+        <li><a href="#future-considerations">Future considerations</a></li>
         <li><a href="#credits">Credits</a></li>
       </ol>
 
@@ -754,7 +755,32 @@
       <p>Another minor issue with this pattern is increased memory consumption. By defining all of the function variations upfront, you implicitly create N-1 unused functions. As you can see, if <code>attachEvent</code> is found in <code>document.documentElement</code>, then neither <code>addEventListener</code> nor <code>addEventAsProperty</code> are ever really used. Yet, they already consume memory; memory which is never deallocated for the same reason as with JScript&#8217;s buggy named expressions — both functions are &#8220;trapped&#8221; in a closure of returning one. </p>
 
       <p>This increased consumption is of course hardly an issue. If a library such as Prototype.js was to use this pattern, there would be not more than 100-200 extra function objects created. As long as functions are not created in such way repeatedly (at runtime) but only once (at load time), you probably shouldn&#8217;t worry about it.</p>
-
+      
+      <h2 id="future-considerations">Future considerations</h2>
+      
+      <p>Upcoming version of ECMAScript-262 — 5th edition (currently draft) — introduces so-called <strong>strict mode</strong>. The purpose of strict mode is to disallow certain parts of the language which are considered to be fragile, unreliable or dangerous. One of such parts is <code>arguments.callee</code>, "banned" presumably due to security concerns. When in strict mode, access to <code>arguments.callee</code> results in <code>TypeError</code> (see section 10.6). The reason I'm bringing up strict mode is because inability to use <code>arguments.callee</code> for recursion in 5th edition will most likely result in increased use of named function expressions. Understanding their semantics and bugs will become even more important.</p>
+      
+<pre lang="javascript" class="prettyprint">
+  // Before, you could use arguments.callee
+  (function(x) {
+    if (x &lt;= 1) return 1;
+    return x * arguments.callee(x - 1);
+  })(10);
+  
+  // In strict mode, an alternative solution is to use named function expression
+  (function factorial(x) {
+    if (x &lt;= 1) return 1;
+    return x * factorial(x - 1);
+  })(10);
+  
+  // or just fall back to slightly less flexible function declaration
+  function factorial(x) {
+    if (x &lt;= 1) return 1;
+    return x * factorial(x - 1);
+  }
+  factorial(10);
+</pre>
+      
       <h2 id="credits">Credits</h2>
 
       <p><strong><em>Richard Cornford</em></strong>, for being one of the first people <a href="http://groups.google.com/group/comp.lang.javascript/msg/5b508b03b004bce8">to explain JScript bug with named function expressions</a>. Richard talks and explains most of the bugs mentioned in this article. I highly recommend reading his explanation.</p>
