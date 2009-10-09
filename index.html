@@ -42,9 +42,9 @@
         <a name="introduction"></a>
       </h2>
 
-      <p>Surprisingly, a topic of named function expressions doesn&#8217;t seem to be covered well enough on the web. This is probably why there are so many misconceptions floating around. In this article, I&#8217;ll try to summarize both - theoretical and practical aspects of these wonderful Javascript constructs; the good, bad and ugly parts of them.</p>
+      <p>Surprisingly, a topic of named function expressions doesn&#8217;t seem to be covered well enough on the web. This is probably why there are so many misconceptions floating around. In this article, I&#8217;ll try to summarize both — theoretical and practical aspects of these wonderful Javascript constructs; the good, bad and ugly parts of them.</p>
 
-      <p>In a nutshell, named function expressions are useful for one thing only - <strong>descriptive function names in debuggers and profilers</strong>. Well, there is also a possibility of using function names for recursion, but you will soon see that this is often impractical nowadays. If you don&#8217;t care about debugging experience, you have nothing to worry about. Otherwise, read on to see some of the cross-browser glitches you would have to deal with and tips on how work around them.</p>
+      <p>In a nutshell, named function expressions are useful for one thing only — <strong>descriptive function names in debuggers and profilers</strong>. Well, there is also a possibility of using function names for recursion, but you will soon see that this is often impractical nowadays. If you don&#8217;t care about debugging experience, you have nothing to worry about. Otherwise, read on to see some of the cross-browser glitches you would have to deal with and tips on how work around them.</p>
 
       <p>I&#8217;ll start with a general explanation of what function expressions are how modern debuggers handle them. Feel free to skip to a <a href="#solution">final solution</a>, which explains how to use these constructs safely.</p>
 
@@ -64,7 +64,7 @@
         function Identifier <sub>opt</sub> ( FormalParameterList <sub>opt</sub> ){ FunctionBody }</p>
       </blockquote>
 
-      <p>We can see that when identifier is omitted, that &#8220;something&#8221; can only be an expression. But what if identifier is present? How can one tell whether it is a function declaration or a function expression - they look identical after all? It appears that ECMAScript differentiates between two based on a context. If a <code>function foo(){}</code> is part of, say, assignment expression, it is considered a function expression. If, on the other hand, <code>function foo(){}</code> is contained in a function body or in a (top level of) program itself - it is parsed as a function declaration.</p>
+      <p>We can see that when identifier is omitted, that &#8220;something&#8221; can only be an expression. But what if identifier is present? How can one tell whether it is a function declaration or a function expression — they look identical after all? It appears that ECMAScript differentiates between two based on a context. If a <code>function foo(){}</code> is part of, say, assignment expression, it is considered a function expression. If, on the other hand, <code>function foo(){}</code> is contained in a function body or in a (top level of) program itself — it is parsed as a function declaration.</p>
 
 <pre lang="javascript" class="prettyprint">
   function foo(){}; // declaration, since it's part of a <em>Program</em>
@@ -77,7 +77,7 @@
   })();
 </pre>
     
-<p>A somewhat less obvious example of function expression is the one where function is wrapped with parenthesis - <code>(function foo(){})</code>. The reason it is an expression is again due to a context: "(" and ")" constitute a grouping operator and grouping operator can only contain an expression:</p>
+<p>A somewhat less obvious example of function expression is the one where function is wrapped with parenthesis — <code>(function foo(){})</code>. The reason it is an expression is again due to a context: "(" and ")" constitute a grouping operator and grouping operator can only contain an expression:</p>
       
 <p>To demonstrate with examples:</p>
       
@@ -93,7 +93,7 @@
   }
 </pre>
       
-<p>You might also recall that when evaluating JSON with <code>eval</code>, the string is usually wrapped with parenthesis - <code>eval('(' + json + ')')</code>. This is of course done for the same reason - grouping operator, which parenthesis are, forces JSON brackets to be parsed as expression rather than as a block:</p>
+<p>You might also recall that when evaluating JSON with <code>eval</code>, the string is usually wrapped with parenthesis — <code>eval('(' + json + ')')</code>. This is of course done for the same reason — grouping operator, which parenthesis are, forces JSON brackets to be parsed as expression rather than as a block:</p>
       
 <pre lang="javascript" class="prettyprint">
   try {
@@ -122,7 +122,7 @@
 <pre lang="javascript" class="prettyprint">
   // <strong>Never do this!</strong>
   // Some browsers will declare `foo` as the one returning 'first', 
-  // while others - returning 'second'
+  // while others — returning 'second'
 
   if (true) {
     function foo() {
@@ -141,12 +141,12 @@
   if (true) {
     foo = function() {
       return 'first';
-    }
+    };
   }
   else {
     foo = function() {
       return 'second';
-    }
+    };
   }
   foo();
 </pre>
@@ -181,7 +181,7 @@
         <a name="named-expr"></a>
       </h2>
 
-<p>Quite obviously, when a function expression has a name (technically - <em>Identifier</em>), it is called a <strong>named function expression</strong>. What you&#8217;ve seen in the very first example - <code>var bar = function foo(){};</code> - was exactly that - a named function expression with <code>foo</code> being a function name. An important detail to remember is that this name is <strong>only available in the scope of a newly-defined function</strong>; specs mandate that an identifier should not be available to an enclosing scope:</p>
+<p>Quite obviously, when a function expression has a name (technically — <em>Identifier</em>), it is called a <strong>named function expression</strong>. What you&#8217;ve seen in the very first example — <code>var bar = function foo(){};</code> — was exactly that — a named function expression with <code>foo</code> being a function name. An important detail to remember is that this name is <strong>only available in the scope of a newly-defined function</strong>; specs mandate that an identifier should not be available to an enclosing scope:</p>
 
 <pre lang="javascript" class="prettyprint">
   var f = function foo(){
@@ -201,7 +201,7 @@
         <a name="names-in-debuggers"></a>
       </h2>
 
-      <p>When a function has a corresponding identifier, debuggers show that identifier as a function name, when inspecting call stack. Some debuggers (e.g. Firebug) helpfully show names of even anonymous functions - making them identical to names of variables that functions are assigned to. Unfortunately, these debuggers usually rely on simple parsing rules; Such extraction is usually quite fragile and often produces false results. </p>
+      <p>When a function has a corresponding identifier, debuggers show that identifier as a function name, when inspecting call stack. Some debuggers (e.g. Firebug) helpfully show names of even anonymous functions — making them identical to names of variables that functions are assigned to. Unfortunately, these debuggers usually rely on simple parsing rules; Such extraction is usually quite fragile and often produces false results. </p>
 
       <p>Let&#8217;s look at a simple example:</p>
 
@@ -298,7 +298,7 @@
   expr_test.html()
 </pre>
 
-      <p>You can see call stack showing that <code>foo</code> invoked <code>bar</code>. Clearly, that&#8217;s not what has happened. The confusion is due to the fact that <code>baz</code> was &#8220;exchanged&#8221; references with another function - the one alerting &#8220;spoofed&#8221;. As you can see, such parsing - while great in simple cases - is often useless in any non-trivial script. </p>
+      <p>You can see call stack showing that <code>foo</code> invoked <code>bar</code>. Clearly, that&#8217;s not what has happened. The confusion is due to the fact that <code>baz</code> was &#8220;exchanged&#8221; references with another function — the one alerting &#8220;spoofed&#8221;. As you can see, such parsing — while great in simple cases — is often useless in any non-trivial script. </p>
 
       <p>What it all boils down to is the fact that named <strong>function expressions is the only way to get a truly robust stack inspection</strong>. Let&#8217;s rewrite our previous example with named functions in mind. Notice how both of the functions returning from self-executing wrapper, are named as <code>bar</code>:</p>
 
@@ -337,9 +337,9 @@
         <a name="jscript-bugs"></a>
       </h2>
 
-      <p>Unfortunately, JScript (i.e. Internet Explorer&#8217;s ECMAScript implementation) seriously messed up named function expressions. JScript is responsible for named function expressions <strong>being recommended against</strong> by many people these days. It's also quite sad that even <strong>last version of JScript - 5.8 - used in Internet Explorer 8, still exhibits every single quirk described below</strong></p>
+      <p>Unfortunately, JScript (i.e. Internet Explorer&#8217;s ECMAScript implementation) seriously messed up named function expressions. JScript is responsible for named function expressions <strong>being recommended against</strong> by many people these days. It's also quite sad that even <strong>last version of JScript — 5.8 — used in Internet Explorer 8, still exhibits every single quirk described below</strong></p>
 
-      <p>Let&#8217;s look at what exactly is wrong with its broken implementation. Understanding all of its issues will allow us to work around them safely. Note that I broke these discrepancies into few examples - for clarity - even though all of them are most likely a consequence of one major bug.</p>
+      <p>Let&#8217;s look at what exactly is wrong with its broken implementation. Understanding all of its issues will allow us to work around them safely. Note that I broke these discrepancies into few examples — for clarity — even though all of them are most likely a consequence of one major bug.</p>
 
       <h3 id="example_1_function_expression_identifier_leaks_into_an_enclosing_scope">Example #1: Function expression identifier leaks into an enclosing scope</h3>
 
@@ -348,9 +348,9 @@
     typeof g; // "function"
 </pre>
 
-      <p>Remember how I mentioned that an identifier of named function expression is <strong>not available in an enclosing scope</strong>? Well, JScript doesn&#8217;t agree with specs on this one - <code>g</code> in the above example resolves to a function object. This is a most widely observed discrepancy. It&#8217;s dangerous in that it inadvertedly pollutes an enclosing scope - a scope that might as well be a global one - with an extra identifier. Such pollution can, of course, be a source of hard-to-track bugs.</p>
+      <p>Remember how I mentioned that an identifier of named function expression is <strong>not available in an enclosing scope</strong>? Well, JScript doesn&#8217;t agree with specs on this one — <code>g</code> in the above example resolves to a function object. This is a most widely observed discrepancy. It&#8217;s dangerous in that it inadvertedly pollutes an enclosing scope — a scope that might as well be a global one — with an extra identifier. Such pollution can, of course, be a source of hard-to-track bugs.</p>
 
-      <h3 id="example_2_named_function_expression_is_treated_as_both_function_declaration_and_function_expression">Example #2: Named function expression is treated as BOTH - function declaration AND function expression</h3>
+      <h3 id="example_2_named_function_expression_is_treated_as_both_function_declaration_and_function_expression">Example #2: Named function expression is treated as BOTH — function declaration AND function expression</h3>
 
 <pre lang="javascript" class="prettyprint">
     typeof g; // "function"
@@ -371,7 +371,7 @@
     g.expando; // undefined
 </pre>
 
-      <p>This is where things are getting interesting. Or rather - completely nuts. Here we are seeing the dangers of having to deal with two distinct objects - augmenting one of them obviously does not modify the other one; This could be quite troublesome if you decided to employ, say, caching mechanism and store something in a property of <code>f</code>, then tried accessing it as a property of <code>g</code>, thinking that it is the same object you&#8217;re working with.</p>
+      <p>This is where things are getting interesting. Or rather — completely nuts. Here we are seeing the dangers of having to deal with two distinct objects — augmenting one of them obviously does not modify the other one; This could be quite troublesome if you decided to employ, say, caching mechanism and store something in a property of <code>f</code>, then tried accessing it as a property of <code>g</code>, thinking that it is the same object you&#8217;re working with.</p>
 
       <p>Let&#8217;s look at something a bit more complex.</p>
 
@@ -389,7 +389,7 @@
     g(); // 2
 </pre>
 
-      <p>An example like this could cause even harder to track bugs. What happens here is actually quite simple. First, <code>g</code> is being parsed as a function declaration, and since declarations in JScript are independent of conditional blocks, <code>g</code> is being declared as a function from the &#8220;dead&#8221; <code>if</code> branch - <code>function g(){ return 2 }</code>. Then all of the &#8220;regular&#8221; expressions are being evaluated and <code>f</code> is being assigned another, newly created function object to. &#8220;dead&#8221; <code>if</code> branch is never entered when evaluating expressions, so <code>f</code> keeps referencing first function - <code>function g(){ return 1 }</code>. It should be clear by now, that if you&#8217;re not careful enough, and call <code>g</code> from within <code>f</code>, you&#8217;ll end up calling a completely unrelated <code>g</code> function object.</p>
+      <p>An example like this could cause even harder to track bugs. What happens here is actually quite simple. First, <code>g</code> is being parsed as a function declaration, and since declarations in JScript are independent of conditional blocks, <code>g</code> is being declared as a function from the &#8220;dead&#8221; <code>if</code> branch — <code>function g(){ return 2 }</code>. Then all of the &#8220;regular&#8221; expressions are being evaluated and <code>f</code> is being assigned another, newly created function object to. &#8220;dead&#8221; <code>if</code> branch is never entered when evaluating expressions, so <code>f</code> keeps referencing first function — <code>function g(){ return 1 }</code>. It should be clear by now, that if you&#8217;re not careful enough, and call <code>g</code> from within <code>f</code>, you&#8217;ll end up calling a completely unrelated <code>g</code> function object.</p>
 
       <p>You might be wondering how all this mess with different function objects compares to <code>arguments.callee</code>. Does <code>callee</code> reference <code>f</code> or <code>g</code>? Let&#8217;s take a look:</p>
 
@@ -436,7 +436,7 @@
   })();
 </pre>
 
-      <p>We know that a function returned from within this anonymous invocation - the one that has <code>g</code> identifier - is being assigned to outer <code>f</code>. We also know that named function expressions produce superfluous function object, and that this object is not the same as returned function. The memory issue here is caused by this extraneous <code>g</code> function being literally &#8220;trapped&#8221; in a closure of returning function. This happens because inner function is declared in the same scope as that pesky <code>g</code> one. Unless we <strong>explicitly break reference to <code>g</code> function</strong> it will keep consuming memory.</p>
+      <p>We know that a function returned from within this anonymous invocation — the one that has <code>g</code> identifier — is being assigned to outer <code>f</code>. We also know that named function expressions produce superfluous function object, and that this object is not the same as returned function. The memory issue here is caused by this extraneous <code>g</code> function being literally &#8220;trapped&#8221; in a closure of returning function. This happens because inner function is declared in the same scope as that pesky <code>g</code> one. Unless we <strong>explicitly break reference to <code>g</code> function</strong> it will keep consuming memory.</p>
 
 <pre lang="javascript" class="prettyprint">
   var f = (function(){
@@ -508,7 +508,7 @@
     with `null`:      14K -> 27K
 </pre>
 
-      <p>The results somewhat confirmed my assumptions - explicitly nulling superfluous reference did free memory, but the difference in consumption was relatively insignificant. For 10000 function objects, there would be a ~3MB difference. This is definitely something that should be kept in mind when designing large-scale applications, applications that will run for either long time or on devices with limited memory (such as mobile devices). For any small script, the difference probably doesn&#8217;t matter.</p>
+      <p>The results somewhat confirmed my assumptions — explicitly nulling superfluous reference did free memory, but the difference in consumption was relatively insignificant. For 10000 function objects, there would be a ~3MB difference. This is definitely something that should be kept in mind when designing large-scale applications, applications that will run for either long time or on devices with limited memory (such as mobile devices). For any small script, the difference probably doesn&#8217;t matter.</p>
 
       <p>You might think that it&#8217;s all finally over, but we are not just quite there yet :) There&#8217;s a tiny little detail that I&#8217;d like to mention and that detail is Safari 2.x</p>
 
@@ -779,7 +779,7 @@
   `addEvent_addEventListener`, `addEvent_attachEvent`, `addEvent_asProperty`
 </pre>
 
-      <p>Another minor issue with this pattern is increased memory consumption. By defining all of the function variations upfront, you implicitly create N-1 unused functions. As you can see, if <code>attachEvent</code> is found in <code>document.documentElement</code>, then neither <code>addEventListener</code> nor <code>addEventAsProperty</code> are ever really used. Yet, they already consume memory; memory which is never deallocated for the same reason as with JScript&#8217;s buggy named expressions - both functions are &#8220;trapped&#8221; in a closure of returning one. </p>
+      <p>Another minor issue with this pattern is increased memory consumption. By defining all of the function variations upfront, you implicitly create N-1 unused functions. As you can see, if <code>attachEvent</code> is found in <code>document.documentElement</code>, then neither <code>addEventListener</code> nor <code>addEventAsProperty</code> are ever really used. Yet, they already consume memory; memory which is never deallocated for the same reason as with JScript&#8217;s buggy named expressions — both functions are &#8220;trapped&#8221; in a closure of returning one. </p>
 
       <p>This increased consumption is of course hardly an issue. If a library such as Prototype.js was to use this pattern, there would be not more than 100-200 extra function objects created. As long as functions are not created in such way repeatedly (at runtime) but only once (at load time), you probably shouldn&#8217;t worry about it.</p>
 
