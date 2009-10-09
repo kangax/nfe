@@ -37,10 +37,7 @@
         <li><a href="#credits">Credits</a></li>
       </ol>
 
-      <h2 id="introduction">
-        Introduction
-        <a name="introduction"></a>
-      </h2>
+      <h2 id="introduction">Introduction</h2>
 
       <p>Surprisingly, a topic of named function expressions doesn&#8217;t seem to be covered well enough on the web. This is probably why there are so many misconceptions floating around. In this article, I&#8217;ll try to summarize both — theoretical and practical aspects of these wonderful Javascript constructs; the good, bad and ugly parts of them.</p>
 
@@ -48,10 +45,7 @@
 
       <p>I&#8217;ll start with a general explanation of what function expressions are how modern debuggers handle them. Feel free to skip to a <a href="#solution">final solution</a>, which explains how to use these constructs safely.</p>
 
-      <h2 id="function_expressions_vs_function_declarations">
-        Function expressions vs. Function declarations
-        <a name="expr-vs-decl"></a>
-      </h2>
+      <h2 id="expr-vs-decl">Function expressions vs. Function declarations</h2>
 
       <p>One of the two most common ways to create a function object in ECMAScript is by means of either <em>Function Expression</em> or <em>Function Declaration</em>. The difference between two is <strong>rather confusing</strong>. At least it was to me. The only thing ECMA specs make clear is that <em>Function Declaration</em> must always have an <em>Identifier</em> (or a function name, if you prefer), and <em>Function Expression</em> may omit it:</p>
 
@@ -178,10 +172,7 @@
   })();
 </pre>
 
-      <h2 id="named_function_expressions">
-        Named function expressions
-        <a name="named-expr"></a>
-      </h2>
+      <h2 id="named-expr">Named function expressions</h2>
 
 <p>Quite obviously, when a function expression has a name (technically — <em>Identifier</em>), it is called a <strong>named function expression</strong>. What you&#8217;ve seen in the very first example — <code>var bar = function foo(){};</code> — was exactly that — a named function expression with <code>foo</code> being a function name. An important detail to remember is that this name is <strong>only available in the scope of a newly-defined function</strong>; specs mandate that an identifier should not be available to an enclosing scope:</p>
 
@@ -198,10 +189,7 @@
 
       <p>It appears that named functions make for a much more pleasant debugging experience. When debugging an application, having a call stack with descriptive items makes a huge difference.</p>
 
-      <h2 id="function_names_in_debuggers">
-        Function names in debuggers
-        <a name="names-in-debuggers"></a>
-      </h2>
+      <h2 id="names-in-debuggers">Function names in debuggers</h2>
 
       <p>When a function has a corresponding identifier, debuggers show that identifier as a function name, when inspecting call stack. Some debuggers (e.g. Firebug) helpfully show names of even anonymous functions — making them identical to names of variables that functions are assigned to. Unfortunately, these debuggers usually rely on simple parsing rules; Such extraction is usually quite fragile and often produces false results. </p>
 
@@ -334,10 +322,7 @@
 
       <p>Before we start dancing happily celebrating this holy grail finding, I&#8217;d like to bring a beloved JScript into the picture.</p>
 
-      <h2 id="jscript_bugs">
-        JScript bugs
-        <a name="jscript-bugs"></a>
-      </h2>
+      <h2 id="jscript-bugs">JScript bugs</h2>
 
       <p>Unfortunately, JScript (i.e. Internet Explorer&#8217;s ECMAScript implementation) seriously messed up named function expressions. JScript is responsible for named function expressions <strong>being recommended against</strong> by many people these days. It's also quite sad that even <strong>last version of JScript — 5.8 — used in Internet Explorer 8, still exhibits every single quirk described below</strong></p>
 
@@ -422,10 +407,7 @@
 
       <p>I think last point needs a bit of an explanation:</p>
 
-      <h2 id="jscript_memory_management">
-        JScript memory management
-        <a name="jscript-memory-management"></a>
-      </h2>
+      <h2 id="jscript-memory-management">JScript memory management</h2>
 
       <p>Being familiar with JScript discrepancies, we can now see a potential problem with memory consumption when using these buggy constructs. Let&#8217;s look at a simple example:</p>
 
@@ -459,10 +441,7 @@
 
       <p>When taking care of JScript NFE memory leak, I decided to run a simple series of tests to confirm that <code>null</code>ing <code>g</code> actually does free memory.</p>
 
-      <h2 id="tests">
-        Tests
-        <a name="tests"></a>
-      </h2>
+      <h2 id="tests">Tests</h2>
 
       <p>The test was simple. It would simply create 10000 functions via named function expressions and store them in an array. I would then wait for about a minute and check how high the memory consumption is. After that I would null-out the reference and repeat the procedure again. Here&#8217;s a test case I used:</p>
 
@@ -514,10 +493,7 @@
 
       <p>You might think that it&#8217;s all finally over, but we are not just quite there yet :) There&#8217;s a tiny little detail that I&#8217;d like to mention and that detail is Safari 2.x</p>
 
-      <h2 id="safari_bug">
-        Safari bug
-        <a name="safari-bug"></a>
-      </h2>
+      <h2 id="safari-bug">Safari bug</h2>
 
       <p>
       Even less widely known bug with NFE is present in older versions of Safari; namely, Safari 2.x series. I&#8217;ve seen some <a href="http://meyerweb.com/eric/thoughts/2005/07/11/safari-syntaxerror/">claims on the web</a> that Safari 2.x does not support NFE at all. This is not true. Safari does support it, but has bugs in its implementation which you will see shortly.</p>
@@ -644,10 +620,7 @@
 
       <p>This is not really a big deal. As I have already mentioned before, function decompilation is something that <a href="http://thinkweb2.com/projects/prototype/those-tricky-functions/">should not be relied upon</a> anyway. </p>
 
-      <h2 id="solution">
-        Solution
-        <a name="solution"></a>
-      </h2>
+      <h2 id="solution">Solution</h2>
 
 <pre lang="javascript" class="prettyprint">
   var fn = (function(){
@@ -717,10 +690,7 @@
   })();
 </pre>
 
-      <h2 id="alternative_solution">
-        Alternative solution
-        <a name="alt-solution"></a>
-      </h2>
+      <h2 id="alt-solution">Alternative solution</h2>
 
       <p>It&#8217;s worth mentioning that there actually exist alternative ways of having descriptive names in call stacks. Ways that don&#8217;t require one to use named function expressions. First of all, it is often possible to define function via declaration, rather than via expression. This option is only viable when you don&#8217;t need to create more than one function:</p>
 
@@ -785,10 +755,7 @@
 
       <p>This increased consumption is of course hardly an issue. If a library such as Prototype.js was to use this pattern, there would be not more than 100-200 extra function objects created. As long as functions are not created in such way repeatedly (at runtime) but only once (at load time), you probably shouldn&#8217;t worry about it.</p>
 
-      <h2 id="credits">
-        Credits
-        <a name="credits"></a>
-      </h2>
+      <h2 id="credits">Credits</h2>
 
       <p><strong><em>Richard Cornford</em></strong>, for being one of the first people <a href="http://groups.google.com/group/comp.lang.javascript/msg/5b508b03b004bce8">to explain JScript bug with named function expressions</a>. Richard talks and explains most of the bugs mentioned in this article. I highly recommend reading his explanation.</p>
 
