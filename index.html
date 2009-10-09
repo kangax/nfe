@@ -384,8 +384,8 @@
     if (false) {
         f = function g(){
             return 2;
-        }
-    };
+        };
+    }
     g(); // 2
 </pre>
 
@@ -404,6 +404,17 @@
 </pre>
 
       <p>As you can see, <code>arguments.callee</code> references same object as <code>f</code> identifier. This is actually good news, as you will see later on.</p>
+      
+      <p>Another interesting example of "unexpected behavior" can be observed when using named <strong>function expression in undeclared assignment</strong>, but only when function is "named" the same way as identifier it's being assigned to:</p>
+
+<pre lang="javascript" class="prettyprint">
+  (function(){
+    f = function f(){};
+  })();
+</pre>
+      <p>As you might now, undeclared assignment (which is <strong>not recommended</strong> and is only used here for demonstration purposes) should result in creation of global <code>f</code> property. This is exactly what happens in conforming implementations. However, JScript bug makes things a bit more confusing. Since named function expression is parsed as function declaration (see <a href="#example_2_named_function_expression_is_treated_as_both_function_declaration_and_function_expression">example #2</a>), what happens here is that <code>f</code> becomes declared as a local variable during the phase of variable declarations. Later on, when function execution begins, assignment is no longer undeclared, so <code>function f(){}</code> on the right hand side is simply assigned to this newly created <strong>local</strong> <code>f</code> variable. Global <code>f</code> is never created.</p>
+      
+      <p>This demonstrates how failing to understand JScript peculiarities can lead to drastically different behavior in code.</p>
 
       <p>Looking at JScript deficiencies, it becomes pretty clear what exactly we need to avoid. First, we need <strong>to be aware of a leaking identifier</strong> (so that it doesn&#8217;t pollute enclosing scope). Second, we should <strong>never reference identifier used as a function name</strong>; A troublesome identifier is <code>g</code> from the previous examples. Notice how many ambiguities could have been avoided if we were to forget about <code>g</code>&#8217;s existance. Always referencing function via <code>f</code> or <code>arguments.callee</code> is the key here. If you use named expression, think of that name as something that&#8217;s only being used for debugging purposes. And finally, a bonus point is to <strong>always clean up an extraneous function</strong> created erroneously during NFE declaration.</p>
 
@@ -791,7 +802,7 @@
         This <a href="http://github.com/kangax/nfe/tree/master" title="this article on github">article is also versioned on github</a>, where you can track its changes.
       </p>
       <p style="float: right; margin-top: 2em; padding: 0.5em;">
-        Last modified: <span class="dtstart">June 17, 2009</span>
+        Created: <span class="dtstart">June 17, 2009</span> Last modified: <span class="dtstart">October 9, 2009</span>
       </p>
     </div>
     
