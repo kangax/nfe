@@ -1,2 +1,1 @@
-- Explain Spidermonkey's function statements
 - Explain `f = function f(){ ... }` memory usage
