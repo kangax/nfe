@@ -254,3 +254,5 @@ hr.space {background:#fff;color:#fff;}
 .clearfix:after, .container:after {content:"\0020";display:block;height:0;clear:both;visibility:hidden;overflow:hidden;}
 .clearfix, .container {display:block;}
 .clear {clear:both;}
+.excerpt { background: #dfd; margin-bottom: 1.5em; }
+.excerpt p { padding: 1em; margin-bottom: 0; }

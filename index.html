@@ -26,6 +26,7 @@
       <ol>
         <li><a href="#introduction">Introduction</a></li>
         <li><a href="#expr-vs-decl">Function expressions vs. Function declarations</a></li>
+        <li><a href="#function-statements">Function Statements</a></li>
         <li><a href="#named-expr">Named function expressions</a></li>
         <li><a href="#names-in-debuggers">Function names in debuggers</a></li>
         <li><a href="#jscript-bugs">JScript bugs</a></li>
@@ -147,8 +148,126 @@
   foo();
 </pre>
 
-      <p>To explain in more detail: function declarations are only allowed to appear in <em>Program</em> or <em>FunctionBody</em>. Syntactically, they <strong>can not appear in <em>Block</em></strong> — such as that of <code>if</code>, <code>while</code> or <code>for</code> statements. Because of these restrictions, whenever function appears in a block (such as in previous example) it should actually be <strong>considered a syntax error</strong>, not function declaration or expression. The problem is that none of the implementations I've seen parse these functions per rules. Instead, they allow and interpret them in proprietary ways. Interestingly, specification allows implementations to introduce syntax extensions (see section 16), so these function syntax deviations are very much conforming.</p>
+      <p>If you're curious about actual production rules of function declarations, read on. Otherwise, feel free to skip the following excerpt.</p>
+      
+      <div id="function-declarations-in-blocks" class="excerpt">
+        <p>
+          <em>FunctionDeclaration</em>s are only allowed to appear in <em>Program</em> or <em>FunctionBody</em>. 
+          Syntactically, they <strong>can not appear in <em>Block</em></strong> (<code>{ ... }</code>) — such as that of <code>if</code>, 
+          <code>while</code> or <code>for</code> statements. This is because <em>Block</em>s can only contain <em>Statement</em>s, 
+          not <em>SourceElement</em>s, which <em>FunctionDeclaration</em> is.
+          If we look at production rules carefully, we can see that the only way <em>Expression</em> is allowed within <em>Block</em> 
+          is when it is part of <em>ExpressionStatement</em>. However, <em>ExpressionStatement</em> is explicitly defined 
+          <strong>to not begin with "function" keyword</strong>, and this is exactly what makes <em>FunctionExpression</em> 
+          invalid as part of a <em>Statement</em> or <em>Block</em> (note that <em>Block</em> is merely a list of <em>Statement</em>s).
+        </p>
+        <p>
+          Because of these restrictions, whenever function appears in a block (such as in previous example) it should actually be 
+          <strong>considered a syntax error</strong>, not function declaration or expression. The problem is that none of the 
+          implementations I've seen parse these functions per rules. They interpret them in proprietary ways instead.
+        </p>
+      </div>
+      
+      <p>It's worth mentioning that as per specification, implementations are allowed to introduce <strong>syntax extensions</strong> (see section 16), yet still be fully conforming. This is exactly what happens in so many clients these days. Some of them interpret function declarations in blocks as any other function declarations — simply hoisting them to the top of the enclosing scope; Others — introduce different semantics and follow slightly more complex rules.</p>
+      
+      <h2 id="function-statements">Function statements</h2>
+      
+      <div>
+        <p>
+          One of such syntax extensions to ECMAScript is <strong>Function Statements</strong>, 
+          currently implemented in Gecko-based browsers (tested in Firefox 1-3.7a1pre on Mac OS X).
+          Somehow, this extension doesn't seem to be widely known, either for good or bad (<a href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference:Functions#Conditionally_defining_a_function">MDC mentions them</a>, but very briefly).
+          Please remember, that we are discussing it here only for learning purposes and to satisfy our curiosity; 
+          unless you're writing scripts for specific Gecko-based environment, 
+          <strong>I do not recommend relying on this extension</strong>.
+        </p>
+        
+        <p>
+          So, here are some of the traits of these non-standard constructs:
+        </p>
+        
+        <ol>
+          <li>Function statements are allowed to be anywhere where plain <em>Statement</em>s are allowed. This, of course, includes <em>Block</em>s:</li>
+<pre lang="javascript" class="prettyprint">
+  if (true) {
+    function f(){ }
+  }
+  else {
+    function f(){ }
+  }
+</pre>
+          <li>Function statements are interpreted as any other statements, including conditional execution:</li>
+<pre lang="javascript" class="prettyprint">
+  if (true) {
+    function foo(){ return 1; }
+  }
+  else {
+    function foo(){ return 2; }
+  }
+  foo(); // 1
+  // Note that other clients interpet `foo` as function declaration here, 
+  // overwriting first `foo` with the second one, and producing "2", not "1" as a result
+</pre>
+        <li>
+          Function statements are NOT declared during variable instantiation. They are declared at run time, just like function expressions. However, once declared, function statement's identifier <strong>becomes available to the entire scope</strong> of the function. This identifier availability is what makes function statements different from function expressions (you will see exact behavior of named function expressions in next chapter).
+<pre lang="javascript" class="prettyprint">
+  // at this point, `foo` is not yet declared
+  typeof foo; // "undefined"
+  if (true) {
+    // once block is entered, `foo` becomes declared and available to the entire scope
+    function foo(){ return 1; }
+  }
+  else {
+    // this block is never entered, and `foo` is never redeclared
+    function foo(){ return 2; }
+  }
+  typeof foo; // "function"
+  
+</pre>
+  Generally, we can emulate function statements behavior from the previous example with this standards-compliant (and unfortunately, more verbose) code:
+<pre lang="javascript" class="prettyprint">
+  var foo;
+  if (true) {
+    foo = function foo(){ return 1; };
+  }
+  else {
+    foo = function foo() { return 2; };
+  }
+</pre>
+        </li>
+        <li>
+          String representation of functions statements is similar to that of function declarations or named function expressions (and includes identifier — "foo" in this example):
+<pre lang="javascript" class="prettyprint">
+  if (true) {
+    function foo(){ return 1; }
+  }
+  String(foo); // function foo() { return 1; }
+</pre>
+        </li>
+        <li>
+Finally, what appears to be a bug in earlier Gecko-based implementations (present in &lt;= Firefox 3), is the way function statements overwrite function declarations. Earlier versions were somehow failing to overwrite function declarations with function statements:
+<pre lang="javascript" class="prettyprint">
+  // function declaration
+  function foo(){ return 1; }
+  if (true) {
+    // overwritting with function statement
+    function foo(){ return 2; }
+  }
+  foo(); // 1 in FF&lt;= 3, 2 in FF3.5 and later
+  
+  // however, this doesn't happen when overwriting function expression
+  var foo = function(){ return 1; };
+  if (true) {
+    function foo(){ return 2; }
+  }
+  foo(); // 2 in all versions
+</pre>
+        </li>
+        </ol>
+      </div>
 
+      <h2 id="named-expr">Named function expressions</h2>
+      
       <p>Function expressions can actually be seen quite often. A common pattern in web development is to &#8220;fork&#8221; function definitions based on some kind of a feature test, allowing for the best performance. Since such forking usually happens in the same scope, it is almost always necessary to use function expressions. After all, as we know by now, function declarations should not be executed conditionally:</p>
 
 <pre lang="javascript" class="prettyprint">
@@ -173,8 +292,6 @@
     }
   })();
 </pre>
-
-      <h2 id="named-expr">Named function expressions</h2>
 
 <p>Quite obviously, when a function expression has a name (technically — <em>Identifier</em>), it is called a <strong>named function expression</strong>. What you&#8217;ve seen in the very first example — <code>var bar = function foo(){};</code> — was exactly that — a named function expression with <code>foo</code> being a function name. An important detail to remember is that this name is <strong>only available in the scope of a newly-defined function</strong>; specs mandate that an identifier should not be available to an enclosing scope:</p>
 
