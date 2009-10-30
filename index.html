@@ -267,8 +267,8 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
         </ol>
         <p id="function-statements-in-safari">
           Note that older Safari (at least 2.0-2.0.4 and 3.0.4, and possibly earlier versions too) implement function statements <strong>identically to SpiderMonkey</strong>. 
-          All examples from this chapter, except the last "bug" one, produce same results in those versions of Safari as they do in, say, Firefox. 
-          This diversity in behavior demonstrates once again what a bad idea it is to rely on these extensions.
+          All examples from this chapter, except the last "bug" one, produce same results in those versions of Safari as they do in, say, Firefox. Another browser that seems to 
+          follow same semantics is Blackberry one (at least 8230, 9000 and 9530 models). This diversity in behavior demonstrates once again what a bad idea it is to rely on these extensions.
         </p>
       </div>
 
@@ -785,7 +785,6 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       alert(x); // alerts `outer`
     
     })();
-    
   })();
   
 </pre>
@@ -795,6 +794,64 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
   as it was probably considered a security hole. A "special" object no longer inherits from <code>Object.prototype</code>. 
   You can, however, still see it in Firefox &lt;=3.
 </p>
+
+<p id="activation-object-in-blackberry-browser">
+  Another environment implementing internal object as an instance of global <code>Object</code> is <strong>Blackberry browser</strong>. 
+  Only this time, it's <em>Activation Object</em> that inherits from <code>Object.prototype</code>. Note that specification actually
+  doesn't codify <em>Activation Object</em> to be created "as if by expression new Object()" (as is the case with NFE's identifier holder object).
+  It states that <em>Activation Object</em> is merely a specification mechanism.
+</p>
+
+<p>So, let's see what happens in Blackberry browser:</p>
+
+<pre lang="javascript" class="prettyprint">
+  
+  Object.prototype.x = 'outer';
+  
+  (function(){
+    
+    var x = 'inner';
+    
+    (function(){
+      
+      /*
+      
+      When `x` is being resolved against scope chain, this local function's Activation Object is searched first. 
+      There's no `x` in it, of course. However, since Activation Object inherits from `Object.prototype`, it is 
+      `Object.prototype` that's being searched for `x` next. `Object.prototype.x` does in fact exist and so `x` 
+      resolves to its value — 'outer'. As in the previous example, outer function's scope (Activation Object) 
+      with its own x === 'inner' is never even reached.
+      
+      */
+      
+      alert(x); // alerts 'outer'
+      
+    })();
+  })();
+</pre>
+
+<p>
+  This might look bizarre, but what's really disturbing is that there's even more chance of conflict with 
+  already existing <code>Object.prototype</code> members:
+</p>
+
+<pre lang="javascript" class="prettyprint">
+  (function(){
+    
+    var constructor = function(){ return 1; }
+    
+    (function(){
+      
+      constructor(); // evaluates to an object `{ }`, not `1`
+      
+      constructor === Object.prototype.constructor; // true
+      toString === Object.prototype.toString; // true
+      
+      // etc.
+      
+    })();
+  })();
+</pre>
       
       <h2 id="solution">Solution</h2>
 
