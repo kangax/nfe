@@ -507,9 +507,10 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     ];
   };
   f(); // [true, false]
+  g(); // [false, true]
 </pre>
 
-      <p>As you can see, <code>arguments.callee</code> references same object as <code>f</code> identifier. This is actually good news, as you will see later on.</p>
+      <p>As you can see, <code>arguments.callee</code> references whatever function is being invoked. This is actually good news, as you will see later on.</p>
       
       <p>Another interesting example of "unexpected behavior" can be observed when using named <strong>function expression in undeclared assignment</strong>, but only when function is "named" the same way as identifier it's being assigned to:</p>
 

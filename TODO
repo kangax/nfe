@@ -1,3 +1,5 @@
-- Explain `f = function f(){ ... }` memory usage
+- Explain `f = function f(){ ... }` memory usage (and what the hell happens there)
 - Add note from ES5 about func. decl. in statements
 - Mention Safari <=3.0.4 implementing something similar to func. statements
+- Mention Blackberry <Activation Object>.[[Prototype]] === Object.prototype (thanks to Garrett)
+- Mention SpiderMonkey having <NFE Object>.[[Prototype]] === Object.prototype (thanks to Soshnikov)
