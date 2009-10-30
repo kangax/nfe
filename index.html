@@ -33,6 +33,7 @@
         <li><a href="#jscript-memory-management">JScript memory management</a></li>
         <li><a href="#tests">Tests</a></li>
         <li><a href="#safari-bug">Safari bug</a></li>
+        <li><a href="#spidermonkey-peculiarity">SpiderMonkey peculiarity</a></li>
         <li><a href="#solution">Solution</a></li>
         <li><a href="#alt-solution">Alternative solution</a></li>
         <li><a href="#webkit-displayName">WebKit's displayName</a></li>
@@ -744,7 +745,57 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 </pre>
 
       <p>This is not really a big deal. As I have already mentioned before, function decompilation is something that <a href="http://thinkweb2.com/projects/prototype/those-tricky-functions/">should not be relied upon</a> anyway. </p>
+      
+      <h2 id="spidermonkey-peculiarity">SpiderMonkey peculiarity</h2>
+      
+      <p>
+        We know that identifier of named function expression is only available to the local scope of a function. 
+        But how does this "magic" scoping actually happen? It appears to be very simple. 
+        When named function expression is evaluated, a <strong>special object is created</strong>. 
+        The sole purpose of that object is to hold a property with the name corresponding to function identifier, and value corresponding to function itself.
+        That object is then injected into the front of the current scope chain, and this "augmented" scope chain is then used to initialize a function.
+      </p>
+      
+      <p>
+        The interesting part here, however, is the way ECMA-262 defines this "special" object — the one that holds function identifier. 
+        Spec says that an object is created <strong>"as if by expression new Object()"</strong> which, when interpreted literally, 
+        makes this object an instance of global <code>Object</code>. However, only one implementation — SpiderMonkey — 
+        followed this specification requirement literally. In SpiderMonkey, it is possible to interfere with function local variables by augmenting <code>Object.prototype</code>:
+      </p>
 
+<pre lang="javascript" class="prettyprint">
+  
+  Object.prototype.x = 'outer';
+  
+  (function(){
+    
+    var x = 'inner';
+    
+    /*
+      `foo` function here has a special object in its scope chain — to hold an identifier. That object is practically a — 
+      `{ foo: &lt;function object&gt; }`. When `x` is being resolved through the scope chain, it is first searched for in 
+      `foo`'s local context. When not found, it is searched in the next object from the scope chain. That object turns out 
+      to be the one that holds identifier — { foo: &lt;function object&gt; } and since it inherits from `Object.prototype`, 
+      `x` is found right here, and is the one that's `Object.prototype.x` (with value of 'outer'). Outer function's scope 
+      (with x === 'inner') is never even reached.
+    */
+    
+    (function foo(){
+      
+      alert(x); // alerts `outer`
+    
+    })();
+    
+  })();
+  
+</pre>
+
+<p>
+  Note that later versions of SpiderMonkey actually <strong>changed this behavior</strong>, 
+  as it was probably considered a security hole. A "special" object no longer inherits from <code>Object.prototype</code>. 
+  You can, however, still see it in Firefox &lt;=3.
+</p>
+      
       <h2 id="solution">Solution</h2>
 
 <pre lang="javascript" class="prettyprint">
