@@ -264,6 +264,11 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 </pre>
         </li>
         </ol>
+        <p id="function-statements-in-safari">
+          Note that older Safari (at least 2.0-2.0.4 and 3.0.4, and possibly earlier versions too) implement function statements <strong>identically to SpiderMonkey</strong>. 
+          All examples from this chapter, except the last "bug" one, produce same results in those versions of Safari as they do in, say, Firefox. 
+          This diversity in behavior demonstrates once again what a bad idea it is to rely on these extensions.
+        </p>
       </div>
 
       <h2 id="named-expr">Named function expressions</h2>
