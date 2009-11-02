@@ -815,13 +815,11 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     (function(){
       
       /*
-      
       When `x` is being resolved against scope chain, this local function's Activation Object is searched first. 
       There's no `x` in it, of course. However, since Activation Object inherits from `Object.prototype`, it is 
       `Object.prototype` that's being searched for `x` next. `Object.prototype.x` does in fact exist and so `x` 
       resolves to its value — 'outer'. As in the previous example, outer function's scope (Activation Object) 
       with its own x === 'inner' is never even reached.
-      
       */
       
       alert(x); // alerts 'outer'
@@ -838,7 +836,7 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 <pre lang="javascript" class="prettyprint">
   (function(){
     
-    var constructor = function(){ return 1; }
+    var constructor = function(){ return 1; };
     
     (function(){
       
