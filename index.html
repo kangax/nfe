@@ -862,13 +862,13 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     // conditionally create a named function
     // and assign its reference to `f`
     if (true) {
-      f = function F(){ }
+      f = function F(){ };
     }
     else if (false) {
-      f = function F(){ }
+      f = function F(){ };
     }
     else {
-      f = function F(){ }
+      f = function F(){ };
     }
 
     // Assign `null` to a variable corresponding to a function name
@@ -898,17 +898,17 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       // 3) make sure to give function a descriptive identifier
       fn = function addEvent(element, eventName, callback) {
         element.addEventListener(eventName, callback, false);
-      }
+      };
     }
     else if (docEl.attachEvent) {
       fn = function addEvent(element, eventName, callback) {
         element.attachEvent('on' + eventName, callback);
-      }
+      };
     }
     else {
       fn = function addEvent(element, eventName, callback) {
         element['on' + eventName] = callback;
-      }
+      };
     }
 
     // 4) clean up `addEvent` function created by JScript
