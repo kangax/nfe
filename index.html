@@ -759,7 +759,7 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       <p>
         The interesting part here, however, is the way ECMA-262 defines this "special" object — the one that holds function identifier. 
         Spec says that an object is created <strong>"as if by expression new Object()"</strong> which, when interpreted literally, 
-        makes this object an instance of global <code>Object</code>. However, only one implementation — SpiderMonkey — 
+        makes this object an instance of built-in <code>Object</code> constructor. However, only one implementation — SpiderMonkey — 
         followed this specification requirement literally. In SpiderMonkey, it is possible to interfere with function local variables by augmenting <code>Object.prototype</code>:
       </p>
 
@@ -850,8 +850,13 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     })();
   })();
 </pre>
+
+<p>
+  Solution to this Blackberry discrepancy is obvious: avoid naming variables as <code>Object.prototype</code> properties 
+  — <code>toString</code>, <code>valueOf</code>, <code>hasOwnProperty</code>, and so on.
+</p>
       
-      <h2 id="solution">Solution</h2>
+      <h2 id="solution">JScript solution</h2>
 
 <pre lang="javascript" class="prettyprint">
   var fn = (function(){
