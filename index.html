@@ -284,12 +284,12 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     if (typeof docEl.compareDocumentPosition != 'undefined') {
       return function(el, b) {
         return (el.compareDocumentPosition(b) &amp; 16) !== 0;
-      }
+      };
     }
     else if (typeof docEl.contains != 'undefined') {
       return function(el, b) {
         return el !== b &amp;&amp; el.contains(b);
-      }
+      };
     }
     return function(el, b) {
       if (el === b) return false;
