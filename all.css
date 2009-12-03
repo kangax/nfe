@@ -256,3 +256,56 @@ hr.space {background:#fff;color:#fff;}
 .clear {clear:both;}
 .excerpt { background: #dfd; margin-bottom: 1.5em; }
 .excerpt p { padding: 1em; margin-bottom: 0; }
+
+/* Pretty printing styles. Used with prettify.js. */
+
+.str { color: #080; }
+.kwd { color: #008; }
+.com { color: #800; }
+.typ { color: #606; }
+.lit { color: #066; }
+.pun { color: #660; }
+.pln { color: #000; }
+.tag { color: #008; }
+.atn { color: #606; }
+.atv { color: #080; }
+.dec { color: #606; }
+pre.prettyprint { padding: 2px; border: 1px solid #888; }
+
+@media print {
+  .str { color: #060; }
+  .kwd { color: #006; font-weight: bold; }
+  .com { color: #600; font-style: italic; }
+  .typ { color: #404; font-weight: bold; }
+  .lit { color: #044; }
+  .pun { color: #440; }
+  .pln { color: #000; }
+  .tag { color: #006; font-weight: bold; }
+  .atn { color: #404; }
+  .atv { color: #060; }
+}
+
+pre.prettyprint { background-color: #F4F2E5; border: none; }
+.dtstart { background-color: #ffc; font-weight: bold; }
+
+/* blueprint print.css */
+
+@media print {
+  
+  body {line-height:1.5;font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;color:#000;background:none;font-size:10pt;}
+  .container {background:none;}
+  hr {background:#ccc;color:#ccc;width:100%;height:2px;margin:2em 0;padding:0;border:none;}
+  hr.space {background:#fff;color:#fff;}
+  h1, h2, h3, h4, h5, h6 {font-family:"Helvetica Neue", Arial, "Lucida Grande", sans-serif;}
+  code {font:.9em "Courier New", Monaco, Courier, monospace;}
+  img {float:left;margin:1.5em 1.5em 1.5em 0;}
+  a img {border:none;}
+  p img.top {margin-top:0;}
+  blockquote {margin:1.5em;padding:1em;font-style:italic;font-size:.9em;}
+  .small {font-size:.9em;}
+  .large {font-size:1.1em;}
+  .quiet {color:#999;}
+  .hide {display:none;}
+  a:link, a:visited {background:transparent;font-weight:700;text-decoration:underline;}
+  a:link:after, a:visited:after {content:" (" attr(href) ")";font-size:90%;}
+}
