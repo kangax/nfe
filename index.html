@@ -72,13 +72,13 @@
       <p>We can see that when identifier is omitted, that &#8220;something&#8221; can only be an expression. But what if identifier is present? How can one tell whether it is a function declaration or a function expression — they look identical after all? It appears that ECMAScript differentiates between two based on a context. If a <code>function foo(){}</code> is part of, say, assignment expression, it is considered a function expression. If, on the other hand, <code>function foo(){}</code> is contained in a function body or in a (top level of) program itself — it is parsed as a function declaration.</p>
 
 <pre lang="javascript" class="prettyprint">
-  function foo(){}; // declaration, since it's part of a <em>Program</em>
+  function foo(){} // declaration, since it's part of a <em>Program</em>
   var bar = function foo(){}; // expression, since it's part of an <em>AssignmentExpression</em>
 
   new function bar(){}; // expression, since it's part of a <em>NewExpression</em>
 
   (function(){
-    function bar(){}; // declaration, since it's part of a <em>FunctionBody</em>
+    function bar(){} // declaration, since it's part of a <em>FunctionBody</em>
   })();
 </pre>
     
@@ -88,7 +88,7 @@
       
 <pre lang="javascript" class="prettyprint">
   
-  function foo(){}; // function declaration
+  function foo(){} // function declaration
   (function foo(){}); // function expression: due to grouping operator
   
   try {
@@ -302,7 +302,7 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       if (el === b) return false;
       while (el != b &amp;&amp; (b = b.parentNode) != null);
       return el === b;
-    }
+    };
   })();
 </pre>
 
@@ -379,12 +379,12 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     if (window.addEventListener) {
       return function(){
         return baz();
-      }
+      };
     }
     else if (window.attachEvent) {
       return function() {
         return baz();
-      }
+      };
     }
   })();
   function baz(){
@@ -411,7 +411,7 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
   var baz = bar;
   bar = function() { 
     alert('spoofed');
-  }
+  };
   foo();
 
   // Call stack:
@@ -432,12 +432,12 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     if (window.addEventListener) {
       return function bar(){
         return baz();
-      }
+      };
     }
     else if (window.attachEvent) {
       return function bar() {
         return baz();
-      }
+      };
     }
   })();
   function baz(){
@@ -498,12 +498,12 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
 <pre lang="javascript" class="prettyprint">
     var f = function g() {
-        return 1;
+      return 1;
     };
     if (false) {
-        f = function g(){
-            return 2;
-        };
+      f = function g(){
+        return 2;
+      };
     }
     g(); // 2
 </pre>
@@ -585,17 +585,17 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       if (true) {
         f = function F(){
           return 'standard';
-        }
+        };
       }
       else if (false) {
         f = function F(){
           return 'alternative';
-        }
+        };
       }
       else {
         f = function F(){
           return 'fallback';
-        }
+        };
       }
       // var F = null;
       return f;
