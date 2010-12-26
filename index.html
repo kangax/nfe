@@ -975,7 +975,7 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
     if (typeof docEl.addEventListener != 'undefined') {
       return addEventListener;
     }
-    elseif (typeof docEl.attachEvent != 'undefined') {
+    else if (typeof docEl.attachEvent != 'undefined') {
       return attachEvent;
     }
     return addEventAsProperty;
