@@ -164,13 +164,12 @@
           Syntactically, they <strong>can not appear in <em>Block</em></strong> (<code>{ ... }</code>) — such as that of <code>if</code>, 
           <code>while</code> or <code>for</code> statements. This is because <em>Block</em>s can only contain <em>Statement</em>s, 
           not <em>SourceElement</em>s, which <em>FunctionDeclaration</em> is.
-          If we look at production rules carefully, we can see that the only way <em>Expression</em> is allowed within <em>Block</em> 
+          If we look at production rules carefully, we can see that the only way <em>Expression</em> is allowed directly within <em>Block</em> 
           is when it is part of <em>ExpressionStatement</em>. However, <em>ExpressionStatement</em> is explicitly defined 
-          <strong>to not begin with "function" keyword</strong>, and this is exactly what makes <em>FunctionExpression</em> 
-          invalid as part of a <em>Statement</em> or <em>Block</em> (note that <em>Block</em> is merely a list of <em>Statement</em>s).
+          <strong>to not begin with "function" keyword</strong>, and this is exactly why <em>FunctionExpression</em> cannot appear directly within a <em>Statement</em> or <em>Block</em> (note that <em>Block</em> is merely a list of <em>Statement</em>s).
         </p>
         <p>
-          Because of these restrictions, whenever function appears in a block (such as in previous example) it should actually be 
+          Because of these restrictions, whenever function appears directly in a block (such as in the previous example) it should actually be 
           <strong>considered a syntax error</strong>, not function declaration or expression. The problem is that almost none of the 
           implementations I've seen parse these functions strictly per rules (exceptions are <a href="http://sourceforge.net/projects/besen/">BESEN</a> and <a href="http://www.digitalmars.com/dscript/">DMDScript</a>). They interpret them in proprietary ways instead.
         </p>
