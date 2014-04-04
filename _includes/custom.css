@@ -1,0 +1,35 @@
+h1 {
+  margin-top: 1em;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+.excerpt { background: #dfd; margin-bottom: 1.5em; }
+.excerpt p { padding: 1em; margin-bottom: 0; }
+
+.footer {
+  margin-top: 2em;
+}
+
+.footer p:first-child {
+  background: #ffc;
+}
+
+.dtstart {
+  background-color: #ffc;
+  font-weight: bold;
+}
