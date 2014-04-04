@@ -12,16 +12,7 @@
     
     <link rel="stylesheet" href="all.css" type="text/css" media="all">
     
-    <script type="text/javascript">
-      var _gaq = [['_setAccount', 'UA-1128111-17'],['_trackPageview']];
-      (function(d) {
-          var script = d.createElement('script'),
-              head   = d.getElementsByTagName('head')[0] || d.documentElement;
-          script.async = true;
-          script.src = 'http://www.google-analytics.com/ga.js';
-          head.insertBefore(script, head.firstChild);
-      })(document);
-    </script>
+    <script src="prettify.js" type="text/javascript"></script>
     
   </head>
   <body onload="prettyPrint();">
@@ -1050,6 +1041,13 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
         Created: <span class="dtstart">June 17, 2009</span> Last modified: <span class="dtstart">June 8, 2010</span>
       </p>
     </div>
-    <script src="prettify.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www."); 
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try { var pageTracker = _gat._getTracker("UA-1128111-17"); pageTracker._trackPageview(); } catch(err) {}
+    </script>
   </body>
 </html>
