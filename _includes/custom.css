@@ -1,35 +1,33 @@
-h1 {
-  margin-top: 1em;
+h1 .small {
+  display: inline-block;
+  line-height: 1.8;
 }
 
-.text-left {
-  text-align: left;
+.well.bg-success {
+  background-color: #dfd;
 }
 
-.text-right {
-  text-align: right;
+.highlight pre {
+  padding: 15px;
+  overflow-x: auto;
+  word-wrap: normal;
+  white-space: pre;
 }
 
-.pull-left {
-  float: left;
+pre code {
+  overflow-x: auto;
+  word-wrap: normal;
+  white-space: pre;
 }
-
-.pull-right {
-  float: right;
-}
-
-.excerpt { background: #dfd; margin-bottom: 1.5em; }
-.excerpt p { padding: 1em; margin-bottom: 0; }
 
 .footer {
   margin-top: 2em;
+  margin-bottom: 1em;
 }
 
-.footer p:first-child {
-  background: #ffc;
-}
-
-.dtstart {
-  background-color: #ffc;
-  font-weight: bold;
+@media (min-width: 992px) {
+  h1 .small,
+  .footer-right {
+     float: right;
+  }
 }
