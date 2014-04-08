@@ -1,34 +1,30 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-  "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>    
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    
+---
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta content="An article about named function expressions in Javascript" name="description">
     <meta content="named function expressions, function expression, javascript, jscript identifier leak, function names in debuggers" name="keywords">
     <meta content="Juriy 'kangax' Zaytsev" name="author">
-    
     <title>Named function expressions demystified</title>
-    
-    <link rel="stylesheet" href="all.css" type="text/css" media="all">
-    
-    <script type="text/javascript">
-      var _gaq = [['_setAccount', 'UA-1128111-17'],['_trackPageview']];
-      (function(d) {
-          var script = d.createElement('script'),
-              head   = d.getElementsByTagName('head')[0] || d.documentElement;
-          script.async = true;
-          script.src = 'http://www.google-analytics.com/ga.js';
-          head.insertBefore(script, head.firstChild);
-      })(document);
-    </script>
-    
+    <link rel="stylesheet" href="all.css">
+    <!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
   </head>
-  <body onload="prettyPrint();">
+  <body>
     <div class="container">
-      
-      <h1 style="margin-top: 1em;">Named function expressions demystified</h1>
-      <p style="text-align: right;"><em>by <a href="http://perfectionkills.com/" title="">Juriy "kangax" Zaytsev</a></em></p>
+
+      <div class="page-header">
+        <h1>Named function expressions demystified
+          <span class="small"><em>by <a href="http://perfectionkills.com/">Juriy "kangax" Zaytsev</a></em>
+        </h1>
+      </div>
 
       <ol>
         <li><a href="#introduction">Introduction</a></li>
@@ -71,250 +67,252 @@
 
       <p>We can see that when identifier is omitted, that &#8220;something&#8221; can only be an expression. But what if identifier is present? How can one tell whether it is a function declaration or a function expression — they look identical after all? It appears that ECMAScript differentiates between two based on a context. If a <code>function foo(){}</code> is part of, say, assignment expression, it is considered a function expression. If, on the other hand, <code>function foo(){}</code> is contained in a function body or in a (top level of) program itself — it is parsed as a function declaration.</p>
 
-<pre lang="javascript" class="prettyprint">
-  function foo(){} // declaration, since it's part of a <em>Program</em>
-  var bar = function foo(){}; // expression, since it's part of an <em>AssignmentExpression</em>
+{% highlight js %}
+function foo(){} // declaration, since it's part of a <em>Program</em>
+var bar = function foo(){}; // expression, since it's part of an <em>AssignmentExpression</em>
 
-  new function bar(){}; // expression, since it's part of a <em>NewExpression</em>
+new function bar(){}; // expression, since it's part of a <em>NewExpression</em>
 
-  (function(){
-    function bar(){} // declaration, since it's part of a <em>FunctionBody</em>
-  })();
-</pre>
-    
+(function(){
+  function bar(){} // declaration, since it's part of a <em>FunctionBody</em>
+})();
+{% endhighlight %}
+
 <p>A somewhat less obvious example of function expression is the one where function is wrapped with parenthesis — <code>(function foo(){})</code>. The reason it is an expression is again due to a context: "(" and ")" constitute a grouping operator and grouping operator can only contain an expression:</p>
-      
+
 <p>To demonstrate with examples:</p>
-      
-<pre lang="javascript" class="prettyprint">
-  
-  function foo(){} // function declaration
-  (function foo(){}); // function expression: due to grouping operator
-  
-  try {
-    (var x = 5); // grouping operator can only contain expression, not a statement (which `var` is)
-  } catch(err) {
-    // SyntaxError
-  }
-</pre>
-      
+
+{% highlight js %}
+function foo(){} // function declaration
+(function foo(){}); // function expression: due to grouping operator
+
+try {
+  (var x = 5); // grouping operator can only contain expression, not a statement (which `var` is)
+} catch(err) {
+  // SyntaxError
+}
+{% endhighlight %}
+
 <p>You might also recall that when evaluating JSON with <code>eval</code>, the string is usually wrapped with parenthesis — <code>eval('(' + json + ')')</code>. This is of course done for the same reason — grouping operator, which parenthesis are, forces JSON brackets to be parsed as expression rather than as a block:</p>
-      
-<pre lang="javascript" class="prettyprint">
-  try {
-    { "x": 5 }; // "{" and "}" are parsed as a block
-  } catch(err) {
-    // SyntaxError
-  }
-  
-  ({ "x": 5 }); // grouping operator forces "{" and "}" to be parsed as object literal
-</pre>
+
+{% highlight js %}
+try {
+  { "x": 5 }; // "{" and "}" are parsed as a block
+} catch(err) {
+  // SyntaxError
+}
+
+({ "x": 5 }); // grouping operator forces "{" and "}" to be parsed as object literal
+{% endhighlight %}
 
       <p>There&#8217;s a subtle difference in behavior of declarations and expressions.</p>
 
       <p>First of all, function declarations are parsed and evaluated before any other expressions are. Even if declaration is positioned last in a source, it will be evaluated <strong>foremost any other expressions</strong> contained in a scope. The following example demonstrates how <code>fn</code> function is already defined by the time <code>alert</code> is executed, even though it&#8217;s being declared right after it:</p>
 
-<pre lang="javascript" class="prettyprint">
-  alert(fn());
+{% highlight js %}
+alert(fn());
 
-  function fn() {
-    return 'Hello world!';
-  }
-</pre>
+function fn() {
+  return 'Hello world!';
+}
+{% endhighlight %}
 
       <p>Another important trait of function declarations is that declaring them conditionally is non-standardized and varies across different environments. You should never rely on functions being declared conditionally and use function expressions instead.</p>
 
-<pre lang="javascript" class="prettyprint">
-  // <strong>Never do this!</strong>
-  // Some browsers will declare `foo` as the one returning 'first', 
-  // while others — returning 'second'
+{% highlight js %}
+// Never do this!
+// Some browsers will declare `foo` as the one returning 'first',
+// while others — returning 'second'
 
-  if (true) {
-    function foo() {
-      return 'first';
-    }
+if (true) {
+  function foo() {
+    return 'first';
   }
-  else {
-    function foo() {
-      return 'second';
-    }
+}
+else {
+  function foo() {
+    return 'second';
   }
-  foo();
+}
+foo();
 
-  // Instead, use function expressions:
-  var foo;
-  if (true) {
-    foo = function() {
-      return 'first';
-    };
-  }
-  else {
-    foo = function() {
-      return 'second';
-    };
-  }
-  foo();
-</pre>
+// Instead, use function expressions:
+var foo;
+if (true) {
+  foo = function() {
+    return 'first';
+  };
+}
+else {
+  foo = function() {
+    return 'second';
+  };
+}
+foo();
+{% endhighlight %}
 
       <p>If you're curious about actual production rules of function declarations, read on. Otherwise, feel free to skip the following excerpt.</p>
-      
-      <div id="function-declarations-in-blocks" class="excerpt">
+
+      <div id="function-declarations-in-blocks" class="well bg-success">
         <p>
-          <em>FunctionDeclaration</em>s are only allowed to appear in <em>Program</em> or <em>FunctionBody</em>. 
-          Syntactically, they <strong>can not appear in <em>Block</em></strong> (<code>{ ... }</code>) — such as that of <code>if</code>, 
-          <code>while</code> or <code>for</code> statements. This is because <em>Block</em>s can only contain <em>Statement</em>s, 
+          <em>FunctionDeclaration</em>s are only allowed to appear in <em>Program</em> or <em>FunctionBody</em>.
+          Syntactically, they <strong>can not appear in <em>Block</em></strong> (<code>{ ... }</code>) — such as that of <code>if</code>,
+          <code>while</code> or <code>for</code> statements. This is because <em>Block</em>s can only contain <em>Statement</em>s,
           not <em>SourceElement</em>s, which <em>FunctionDeclaration</em> is.
-          If we look at production rules carefully, we can see that the only way <em>Expression</em> is allowed directly within <em>Block</em> 
-          is when it is part of <em>ExpressionStatement</em>. However, <em>ExpressionStatement</em> is explicitly defined 
+          If we look at production rules carefully, we can see that the only way <em>Expression</em> is allowed directly within <em>Block</em>
+          is when it is part of <em>ExpressionStatement</em>. However, <em>ExpressionStatement</em> is explicitly defined
           <strong>to not begin with "function" keyword</strong>, and this is exactly why <em>FunctionExpression</em> cannot appear directly within a <em>Statement</em> or <em>Block</em> (note that <em>Block</em> is merely a list of <em>Statement</em>s).
         </p>
         <p>
-          Because of these restrictions, whenever function appears directly in a block (such as in the previous example) it should actually be 
-          <strong>considered a syntax error</strong>, not function declaration or expression. The problem is that almost none of the 
+          Because of these restrictions, whenever function appears directly in a block (such as in the previous example) it should actually be
+          <strong>considered a syntax error</strong>, not function declaration or expression. The problem is that almost none of the
           implementations I've seen parse these functions strictly per rules (exceptions are <a href="http://sourceforge.net/projects/besen/">BESEN</a> and <a href="http://www.digitalmars.com/dscript/">DMDScript</a>). They interpret them in proprietary ways instead.
         </p>
       </div>
-      
+
       <p>It's worth mentioning that as per specification, implementations are allowed to introduce <strong>syntax extensions</strong> (see section 16), yet still be fully conforming. This is exactly what happens in so many clients these days. Some of them interpret function declarations in blocks as any other function declarations — simply hoisting them to the top of the enclosing scope; Others — introduce different semantics and follow slightly more complex rules.</p>
-      
+
       <h2 id="function-statements">Function statements</h2>
-      
+
       <div>
         <p>
-          One of such syntax extensions to ECMAScript is <strong>Function Statements</strong>, 
+          One of such syntax extensions to ECMAScript is <strong>Function Statements</strong>,
           currently implemented in Gecko-based browsers (tested in Firefox 1-3.7a1pre on Mac OS X).
           Somehow, this extension doesn't seem to be widely known, either for good or bad (<a href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference:Functions#Conditionally_defining_a_function">MDC mentions them</a>, but very briefly).
-          Please remember, that we are discussing it here only for learning purposes and to satisfy our curiosity; 
-          unless you're writing scripts for specific Gecko-based environment, 
+          Please remember, that we are discussing it here only for learning purposes and to satisfy our curiosity;
+          unless you're writing scripts for specific Gecko-based environment,
           <strong>I do not recommend relying on this extension</strong>.
         </p>
-        
+
         <p>
           So, here are some of the traits of these non-standard constructs:
         </p>
-        
+
         <ol>
-          <li>Function statements are allowed to be anywhere where plain <em>Statement</em>s are allowed. This, of course, includes <em>Block</em>s:</li>
-<pre lang="javascript" class="prettyprint">
-  if (true) {
-    function f(){ }
-  }
-  else {
-    function f(){ }
-  }
-</pre>
-          <li>Function statements are interpreted as any other statements, including conditional execution:</li>
-<pre lang="javascript" class="prettyprint">
-  if (true) {
-    function foo(){ return 1; }
-  }
-  else {
-    function foo(){ return 2; }
-  }
-  foo(); // 1
-  // Note that other clients interpet `foo` as function declaration here, 
-  // overwriting first `foo` with the second one, and producing "2", not "1" as a result
-</pre>
+          <li>Function statements are allowed to be anywhere where plain <em>Statement</em>s are allowed. This, of course, includes <em>Block</em>s:
+{% highlight js %}
+if (true) {
+  function f(){ }
+}
+else {
+  function f(){ }
+}
+{% endhighlight %}
+        </li>
+          <li>Function statements are interpreted as any other statements, including conditional execution:
+{% highlight js %}
+if (true) {
+  function foo(){ return 1; }
+}
+else {
+  function foo(){ return 2; }
+}
+foo(); // 1
+// Note that other clients interpet `foo` as function declaration here,
+// overwriting first `foo` with the second one, and producing "2", not "1" as a result
+{% endhighlight %}
+        </li>
         <li>
-          Function statements are NOT declared during variable instantiation. They are declared at run time, just like function expressions. However, once declared, function statement's identifier <strong>becomes available to the entire scope</strong> of the function. This identifier availability is what makes function statements different from function expressions (you will see exact behavior of named function expressions in next chapter).
-<pre lang="javascript" class="prettyprint">
-  // at this point, `foo` is not yet declared
-  typeof foo; // "undefined"
-  if (true) {
-    // once block is entered, `foo` becomes declared and available to the entire scope
-    function foo(){ return 1; }
-  }
-  else {
-    // this block is never entered, and `foo` is never redeclared
-    function foo(){ return 2; }
-  }
-  typeof foo; // "function"
-  
-</pre>
+          Function statements are NOT declared during variable instantiation. They are declared at run time, just like function expressions.
+          However, once declared, function statement's identifier <strong>becomes available to the entire scope</strong> of the function.
+          This identifier availability is what makes function statements different from function expressions (you will see exact behavior of named function expressions in next chapter).
+{% highlight js %}
+// at this point, `foo` is not yet declared
+typeof foo; // "undefined"
+if (true) {
+  // once block is entered, `foo` becomes declared and available to the entire scope
+  function foo(){ return 1; }
+}
+else {
+  // this block is never entered, and `foo` is never redeclared
+  function foo(){ return 2; }
+}
+typeof foo; // "function"
+{% endhighlight %}
   Generally, we can emulate function statements behavior from the previous example with this standards-compliant (and unfortunately, more verbose) code:
-<pre lang="javascript" class="prettyprint">
-  var foo;
-  if (true) {
-    foo = function foo(){ return 1; };
-  }
-  else {
-    foo = function foo() { return 2; };
-  }
-</pre>
+{% highlight js %}
+var foo;
+if (true) {
+  foo = function foo(){ return 1; };
+}
+else {
+  foo = function foo() { return 2; };
+}
+{% endhighlight %}
         </li>
         <li>
           String representation of functions statements is similar to that of function declarations or named function expressions (and includes identifier — "foo" in this example):
-<pre lang="javascript" class="prettyprint">
-  if (true) {
-    function foo(){ return 1; }
-  }
-  String(foo); // function foo() { return 1; }
-</pre>
+{% highlight js %}
+if (true) {
+  function foo(){ return 1; }
+}
+String(foo); // function foo() { return 1; }
+{% endhighlight %}
         </li>
         <li>
 Finally, what appears to be a bug in earlier Gecko-based implementations (present in &lt;= Firefox 3), is the way function statements overwrite function declarations. Earlier versions were somehow failing to overwrite function declarations with function statements:
-<pre lang="javascript" class="prettyprint">
-  // function declaration
-  function foo(){ return 1; }
-  if (true) {
-    // overwritting with function statement
-    function foo(){ return 2; }
-  }
-  foo(); // 1 in FF&lt;= 3, 2 in FF3.5 and later
-  
-  // however, this doesn't happen when overwriting function expression
-  var foo = function(){ return 1; };
-  if (true) {
-    function foo(){ return 2; }
-  }
-  foo(); // 2 in all versions
-</pre>
+{% highlight js %}
+// function declaration
+function foo(){ return 1; }
+if (true) {
+  // overwritting with function statement
+  function foo(){ return 2; }
+}
+foo(); // 1 in FF&lt;= 3, 2 in FF3.5 and later
+
+// however, this doesn't happen when overwriting function expression
+var foo = function(){ return 1; };
+if (true) {
+  function foo(){ return 2; }
+}
+foo(); // 2 in all versions
+{% endhighlight %}
         </li>
         </ol>
         <p id="function-statements-in-safari">
-          Note that older Safari (at least 1.2.3, 2.0 - 2.0.4 and 3.0.4, and possibly earlier versions too) implement function statements <strong>identically to SpiderMonkey</strong>. 
-          All examples from this chapter, except the last "bug" one, produce same results in those versions of Safari as they do in, say, Firefox. Another browser that seems to 
+          Note that older Safari (at least 1.2.3, 2.0 - 2.0.4 and 3.0.4, and possibly earlier versions too) implement function statements <strong>identically to SpiderMonkey</strong>.
+          All examples from this chapter, except the last "bug" one, produce same results in those versions of Safari as they do in, say, Firefox. Another browser that seems to
           follow same semantics is Blackberry one (at least 8230, 9000 and 9530 models). This diversity in behavior demonstrates once again what a bad idea it is to rely on these extensions.
         </p>
       </div>
 
       <h2 id="named-expr">Named function expressions</h2>
-      
+
       <p>Function expressions can actually be seen quite often. A common pattern in web development is to &#8220;fork&#8221; function definitions based on some kind of a feature test, allowing for the best performance. Since such forking usually happens in the same scope, it is almost always necessary to use function expressions. After all, as we know by now, function declarations should not be executed conditionally:</p>
 
-<pre lang="javascript" class="prettyprint">
-  // `contains` is part of "APE Javascript library" (http://dhtmlkitchen.com/ape/) by Garrett Smith
-  var contains = (function() {
-    var docEl = document.documentElement;
+{% highlight js %}
+// `contains` is part of "APE Javascript library" (http://dhtmlkitchen.com/ape/) by Garrett Smith
+var contains = (function() {
+  var docEl = document.documentElement;
 
-    if (typeof docEl.compareDocumentPosition != 'undefined') {
-      return function(el, b) {
-        return (el.compareDocumentPosition(b) &amp; 16) !== 0;
-      };
-    }
-    else if (typeof docEl.contains != 'undefined') {
-      return function(el, b) {
-        return el !== b &amp;&amp; el.contains(b);
-      };
-    }
+  if (typeof docEl.compareDocumentPosition != 'undefined') {
     return function(el, b) {
-      if (el === b) return false;
-      while (el != b &amp;&amp; (b = b.parentNode) != null);
-      return el === b;
+      return (el.compareDocumentPosition(b) &amp; 16) !== 0;
     };
-  })();
-</pre>
+  }
+  else if (typeof docEl.contains != 'undefined') {
+    return function(el, b) {
+      return el !== b &amp;&amp; el.contains(b);
+    };
+  }
+  return function(el, b) {
+    if (el === b) return false;
+    while (el != b &amp;&amp; (b = b.parentNode) != null);
+    return el === b;
+  };
+})();
+{% endhighlight %}
 
 <p>Quite obviously, when a function expression has a name (technically — <em>Identifier</em>), it is called a <strong>named function expression</strong>. What you&#8217;ve seen in the very first example — <code>var bar = function foo(){};</code> — was exactly that — a named function expression with <code>foo</code> being a function name. An important detail to remember is that this name is <strong>only available in the scope of a newly-defined function</strong>; specs mandate that an identifier should not be available to an enclosing scope:</p>
 
-<pre lang="javascript" class="prettyprint">
-  var f = function foo(){
-    return typeof foo; // "foo" is available in this inner scope
-  };
-  // `foo` is never visible "outside"
-  typeof foo; // "undefined"
-  f(); // "function"
-</pre>
+{% highlight js %}
+var f = function foo(){
+  return typeof foo; // "foo" is available in this inner scope
+};
+// `foo` is never visible "outside"
+typeof foo; // "undefined"
+f(); // "function"
+{% endhighlight %}
 
       <p>So what&#8217;s so special about these named function expressions? Why would we want to give them names at all? </p>
 
@@ -326,130 +324,130 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <p>Let&#8217;s look at a simple example:</p>
 
-<pre lang="javascript" class="prettyprint">
-  function foo(){
-    return bar();
-  }
-  function bar(){
-    return baz();
-  }
-  function baz(){
-    debugger;
-  }
-  foo();
+{% highlight js %}
+function foo(){
+  return bar();
+}
+function bar(){
+  return baz();
+}
+function baz(){
+  debugger;
+}
+foo();
 
-  // Here, we used function declarations when defining all of 3 functions
-  // When debugger stops at the `debugger` statement, 
-  // the call stack (in Firebug) looks quite descriptive:
-  baz
-  bar
-  foo
-  expr_test.html()
-</pre>
+// Here, we used function declarations when defining all of 3 functions
+// When debugger stops at the `debugger` statement,
+// the call stack (in Firebug) looks quite descriptive:
+baz
+bar
+foo
+expr_test.html()
+{% endhighlight %}
 
       <p>We can see that <code>foo</code> called <code>bar</code> which in its turn called <code>baz</code> (and that <code>foo</code> itself was called from the global scope of <code>expr_test.html</code> document). What&#8217;s really nice, is that Firebug manages to parse the &#8220;name&#8221; of a function even when an anonymous expression is used:</p>
 
-<pre lang="javascript" class="prettyprint">
-  function foo(){
-    return bar();
-  }
-  var bar = function(){
-    return baz();
-  }
-  function baz(){
-    debugger;
-  }
-  foo();
+{% highlight js %}
+function foo(){
+  return bar();
+}
+var bar = function(){
+  return baz();
+}
+function baz(){
+  debugger;
+}
+foo();
 
-  // Call stack
-  baz
-  bar()
-  foo
-  expr_test.html()
-</pre>
+// Call stack
+baz
+bar()
+foo
+expr_test.html()
+{% endhighlight %}
 
       <p>What&#8217;s not very nice, though, is that if a function expression gets any more complex (which, in real life, it almost always is) all of the debugger&#8217;s efforts turn out to be pretty useless; we end up with a shiny question mark in place of a function name:</p>
 
-<pre lang="javascript" class="prettyprint">
-  function foo(){
-    return bar();
+{% highlight js %}
+function foo(){
+  return bar();
+}
+var bar = (function(){
+  if (window.addEventListener) {
+    return function(){
+      return baz();
+    };
   }
-  var bar = (function(){
-    if (window.addEventListener) {
-      return function(){
-        return baz();
-      };
-    }
-    else if (window.attachEvent) {
-      return function() {
-        return baz();
-      };
-    }
-  })();
-  function baz(){
-    debugger;
+  else if (window.attachEvent) {
+    return function() {
+      return baz();
+    };
   }
-  foo();
+})();
+function baz(){
+  debugger;
+}
+foo();
 
-  // Call stack
-  baz
-  (?)()
-  foo
-  expr_test.html()
-</pre> 
+// Call stack
+baz
+(?)()
+foo
+expr_test.html()
+{% endhighlight %}
 
       <p>Another confusion appears when a function is being assigned to more than one variable:</p>
 
-<pre lang="javascript" class="prettyprint">
-  function foo(){
-    return baz();
-  }
-  var bar = function(){
-    debugger;
-  };
-  var baz = bar;
-  bar = function() { 
-    alert('spoofed');
-  };
-  foo();
+{% highlight js %}
+function foo(){
+  return baz();
+}
+var bar = function(){
+  debugger;
+};
+var baz = bar;
+bar = function() {
+  alert('spoofed');
+};
+foo();
 
-  // Call stack:
-  bar()
-  foo
-  expr_test.html()
-</pre>
+// Call stack:
+bar()
+foo
+expr_test.html()
+{% endhighlight %}
 
       <p>You can see call stack showing that <code>foo</code> invoked <code>bar</code>. Clearly, that&#8217;s not what has happened. The confusion is due to the fact that <code>baz</code> was &#8220;exchanged&#8221; references with another function — the one alerting &#8220;spoofed&#8221;. As you can see, such parsing — while great in simple cases — is often useless in any non-trivial script. </p>
 
       <p>What it all boils down to is the fact that named <strong>function expressions is the only way to get a truly robust stack inspection</strong>. Let&#8217;s rewrite our previous example with named functions in mind. Notice how both of the functions returning from self-executing wrapper, are named as <code>bar</code>:</p>
 
-<pre lang="javascript" class="prettyprint">
-  function foo(){
-    return bar();
+{% highlight js %}
+function foo(){
+  return bar();
+}
+var bar = (function(){
+  if (window.addEventListener) {
+    return function bar(){
+      return baz();
+    };
   }
-  var bar = (function(){
-    if (window.addEventListener) {
-      return function bar(){
-        return baz();
-      };
-    }
-    else if (window.attachEvent) {
-      return function bar() {
-        return baz();
-      };
-    }
-  })();
-  function baz(){
-    debugger;
+  else if (window.attachEvent) {
+    return function bar() {
+      return baz();
+    };
   }
-  foo();
+})();
+function baz(){
+  debugger;
+}
+foo();
 
-  // And, once again, we have a descriptive call stack!
-  baz
-  bar
-  foo
-  expr_test.html()
-</pre>
+// And, once again, we have a descriptive call stack!
+baz
+bar
+foo
+expr_test.html()
+{% endhighlight %}
 
       <p>Before we start dancing happily celebrating this holy grail finding, I&#8217;d like to bring a beloved JScript into the picture.</p>
 
@@ -461,19 +459,19 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <h3 id="example_1_function_expression_identifier_leaks_into_an_enclosing_scope">Example #1: Function expression identifier leaks into an enclosing scope</h3>
 
-<pre lang="javascript" class="prettyprint">
-    var f = function g(){};
-    typeof g; // "function"
-</pre>
+{% highlight js %}
+var f = function g(){};
+typeof g; // "function"
+{% endhighlight %}
 
       <p>Remember how I mentioned that an identifier of named function expression is <strong>not available in an enclosing scope</strong>? Well, JScript doesn&#8217;t agree with specs on this one — <code>g</code> in the above example resolves to a function object. This is a most widely observed discrepancy. It&#8217;s dangerous in that it inadvertedly pollutes an enclosing scope — a scope that might as well be a global one — with an extra identifier. Such pollution can, of course, be a source of hard-to-track bugs.</p>
 
       <h3 id="example_2_named_function_expression_is_treated_as_both_function_declaration_and_function_expression">Example #2: Named function expression is treated as BOTH — function declaration AND function expression</h3>
 
-<pre lang="javascript" class="prettyprint">
-    typeof g; // "function"
-    var f = function g(){};
-</pre>
+{% highlight js %}
+typeof g; // "function"
+var f = function g(){};
+{% endhighlight %}
 
       <p>As I explained before, function declarations are parsed foremost any other expressions in a particular execution context. The above example demonstrates how <strong>JScript actually treats named function expressions as function declarations</strong>. You can see that it parses <code>g</code> before an &#8220;actual declaration&#8221; takes place. </p>
 
@@ -481,13 +479,13 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <h3 id="example_3_named_function_expression_creates_two_distinct_function_objects">Example #3: Named function expression creates TWO DISTINCT function objects!</h3>
 
-<pre lang="javascript" class="prettyprint">
-    var f = function g(){};
-    f === g; // false
+{% highlight js %}
+var f = function g(){};
+f === g; // false
 
-    f.expando = 'foo';
-    g.expando; // undefined
-</pre>
+f.expando = 'foo';
+g.expando; // undefined
+{% endhighlight %}
 
       <p>This is where things are getting interesting. Or rather — completely nuts. Here we are seeing the dangers of having to deal with two distinct objects — augmenting one of them obviously does not modify the other one; This could be quite troublesome if you decided to employ, say, caching mechanism and store something in a property of <code>f</code>, then tried accessing it as a property of <code>g</code>, thinking that it is the same object you&#8217;re working with.</p>
 
@@ -495,44 +493,44 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <h3 id="example_4_function_declarations_are_parsed_sequentially_and_are_not_affected_by_conditional_blocks">Example #4: Function declarations are parsed sequentially and are not affected by conditional blocks</h3>
 
-<pre lang="javascript" class="prettyprint">
-    var f = function g() {
-      return 1;
-    };
-    if (false) {
-      f = function g(){
-        return 2;
-      };
-    }
-    g(); // 2
-</pre>
+{% highlight js %}
+var f = function g() {
+  return 1;
+};
+if (false) {
+  f = function g(){
+    return 2;
+  };
+}
+g(); // 2
+{% endhighlight %}
 
       <p>An example like this could cause even harder to track bugs. What happens here is actually quite simple. First, <code>g</code> is being parsed as a function declaration, and since declarations in JScript are independent of conditional blocks, <code>g</code> is being declared as a function from the &#8220;dead&#8221; <code>if</code> branch — <code>function g(){ return 2 }</code>. Then all of the &#8220;regular&#8221; expressions are being evaluated and <code>f</code> is being assigned another, newly created function object to. &#8220;dead&#8221; <code>if</code> branch is never entered when evaluating expressions, so <code>f</code> keeps referencing first function — <code>function g(){ return 1 }</code>. It should be clear by now, that if you&#8217;re not careful enough, and call <code>g</code> from within <code>f</code>, you&#8217;ll end up calling a completely unrelated <code>g</code> function object.</p>
 
       <p>You might be wondering how all this mess with different function objects compares to <code>arguments.callee</code>. Does <code>callee</code> reference <code>f</code> or <code>g</code>? Let&#8217;s take a look:</p>
 
-<pre lang="javascript" class="prettyprint">
-  var f = function g(){
-    return [
-      arguments.callee == f,
-      arguments.callee == g
-    ];
-  };
-  f(); // [true, false]
-  g(); // [false, true]
-</pre>
+{% highlight js %}
+var f = function g(){
+  return [
+    arguments.callee == f,
+    arguments.callee == g
+  ];
+};
+f(); // [true, false]
+g(); // [false, true]
+{% endhighlight %}
 
       <p>As you can see, <code>arguments.callee</code> references whatever function is being invoked. This is actually good news, as you will see later on.</p>
-      
+
       <p>Another interesting example of "unexpected behavior" can be observed when using named <strong>function expression in undeclared assignment</strong>, but only when function is "named" the same way as identifier it's being assigned to:</p>
 
-<pre lang="javascript" class="prettyprint">
-  (function(){
-    f = function f(){};
-  })();
-</pre>
+{% highlight js %}
+(function(){
+  f = function f(){};
+})();
+{% endhighlight %}
       <p>As you might know, undeclared assignment (which is <strong>not recommended</strong> and is only used here for demonstration purposes) should result in creation of global <code>f</code> property. This is exactly what happens in conforming implementations. However, JScript bug makes things a bit more confusing. Since named function expression is parsed as function declaration (see <a href="#example_2_named_function_expression_is_treated_as_both_function_declaration_and_function_expression">example #2</a>), what happens here is that <code>f</code> becomes declared as a local variable during the phase of variable declarations. Later on, when function execution begins, assignment is no longer undeclared, so <code>function f(){}</code> on the right hand side is simply assigned to this newly created <strong>local</strong> <code>f</code> variable. Global <code>f</code> is never created.</p>
-      
+
       <p>This demonstrates how failing to understand JScript peculiarities can lead to drastically different behavior in code.</p>
 
       <p>Looking at JScript deficiencies, it becomes pretty clear what exactly we need to avoid. First, we need <strong>to be aware of a leaking identifier</strong> (so that it doesn&#8217;t pollute enclosing scope). Second, we should <strong>never reference identifier used as a function name</strong>; A troublesome identifier is <code>g</code> from the previous examples. Notice how many ambiguities could have been avoided if we were to forget about <code>g</code>&#8217;s existance. Always referencing function via <code>f</code> or <code>arguments.callee</code> is the key here. If you use named expression, think of that name as something that&#8217;s only being used for debugging purposes. And finally, a bonus point is to <strong>always clean up an extraneous function</strong> created erroneously during NFE declaration.</p>
@@ -543,31 +541,31 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <p>Being familiar with JScript discrepancies, we can now see a potential problem with memory consumption when using these buggy constructs. Let&#8217;s look at a simple example:</p>
 
-<pre lang="javascript" class="prettyprint">
-  var f = (function(){
-    if (true) {
-      return function g(){};
-    }
+{% highlight js %}
+var f = (function(){
+  if (true) {
     return function g(){};
-  })();
-</pre>
+  }
+  return function g(){};
+})();
+{% endhighlight %}
 
       <p>We know that a function returned from within this anonymous invocation — the one that has <code>g</code> identifier — is being assigned to outer <code>f</code>. We also know that named function expressions produce superfluous function object, and that this object is not the same as returned function. The memory issue here is caused by this extraneous <code>g</code> function being literally &#8220;trapped&#8221; in a closure of returning function. This happens because inner function is declared in the same scope as that pesky <code>g</code> one. Unless we <strong>explicitly break reference to <code>g</code> function</strong> it will keep consuming memory.</p>
 
-<pre lang="javascript" class="prettyprint">
-  var f = (function(){
-    var f, g;
-    if (true) {
-      f = function g(){};
-    }
-    else {
-      f = function g(){};
-    }
-    // null `g`, so that it doesn't reference extraneous function any longer
-    g = null;
-    return f;
-  })();
-</pre>
+{% highlight js %}
+var f = (function(){
+  var f, g;
+  if (true) {
+    f = function g(){};
+  }
+  else {
+    f = function g(){};
+  }
+  // null `g`, so that it doesn't reference extraneous function any longer
+  g = null;
+  return f;
+})();
+{% endhighlight %}
 
       <p>Note that we explicitly declare <code>g</code> as well, so that <code>g = null</code> assignment wouldn&#8217;t create a global <code>g</code> variable in conforming clients (i.e. non-JScript ones). By <code>null</code>ing reference to <code>g</code>, we allow garbage collector to wipe off this implicitly created function object that <code>g</code> refers to.</p>
 
@@ -577,39 +575,39 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <p>The test was simple. It would simply create 10000 functions via named function expressions and store them in an array. I would then wait for about a minute and check how high the memory consumption is. After that I would null-out the reference and repeat the procedure again. Here&#8217;s a test case I used:</p>
 
-<pre lang="javascript" class="prettyprint">
-  function createFn(){
-    return (function(){
-      var f;
-      if (true) {
-        f = function F(){
-          return 'standard';
-        };
-      }
-      else if (false) {
-        f = function F(){
-          return 'alternative';
-        };
-      }
-      else {
-        f = function F(){
-          return 'fallback';
-        };
-      }
-      // var F = null;
-      return f;
-    })();
-  }
+{% highlight js %}
+function createFn(){
+  return (function(){
+    var f;
+    if (true) {
+      f = function F(){
+        return 'standard';
+      };
+    }
+    else if (false) {
+      f = function F(){
+        return 'alternative';
+      };
+    }
+    else {
+      f = function F(){
+        return 'fallback';
+      };
+    }
+    // var F = null;
+    return f;
+  })();
+}
 
-  var arr = [ ];
-  for (var i=0; i&lt;10000; i++) {
-    arr[i] = createFn();
-  }
-</pre>
+var arr = [ ];
+for (var i=0; i&lt;10000; i++) {
+  arr[i] = createFn();
+}
+{% endhighlight %}
 
       <p>Results as seen in Process Explorer on Windows XP SP2 were:</p>
 
-<pre lang="javascript" class="prettyprint">
+<pre>
   IE6:
 
     without `null`:   7.6K -> 20.3K
@@ -632,177 +630,174 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
       <p>When encountering function expression in a certain context, Safari 2.x fails to parse the program entirely. It doesn&#8217;t throw any errors (such as <code>SyntaxError</code> ones). It simply bails out:</p>
 
-<pre lang="javascript" class="prettyprint">
-  (function f(){})(); // &lt;== NFE
-  alert(1); // this line is never reached, since previous expression fails the entire program
-</pre>
+{% highlight js %}
+(function f(){})(); // &lt;== NFE
+alert(1); // this line is never reached, since previous expression fails the entire program
+{% endhighlight %}
 
       <p>After fiddling with various test cases, I came to conclusion that Safari 2.x <strong>fails to parse named function expressions, if those are not part of assignment expressions</strong>. Some examples of assignment expressions are:</p>
 
-<pre lang="javascript" class="prettyprint">
-  // part of variable declaration
-    var f = 1;
+{% highlight js %}
+// part of variable declaration
+var f = 1;
 
-    // part of simple assignment
-    f = 2, g = 3;
+// part of simple assignment
+f = 2, g = 3;
 
-    // part of return statement
-    (function(){
-      return (f = 2);
-    })();
-</pre>
+// part of return statement
+(function(){
+  return (f = 2);
+})();
+{% endhighlight %}
 
       <p>This means that putting named function expression into an assignment makes Safari &#8220;happy&#8221;:</p>
 
-<pre lang="javascript" class="prettyprint">
-  (function f(){}); // fails
+{% highlight js %}
+(function f(){}); // fails
 
-  var f = function f(){}; // works
+var f = function f(){}; // works
 
-  (function(){
-    return function f(){}; // fails
-  })();
+(function(){
+  return function f(){}; // fails
+})();
 
-  (function(){
-    return (f = function f(){}); // works
-  })();
+(function(){
+  return (f = function f(){}); // works
+})();
 
-  setTimeout(function f(){ }, 100); // fails
-  
-  Person.prototype = {
-    say: function say() { ... } // fails
-  }
-  
-  Person.prototype.say = function say(){ ... }; // works
-</pre>
+setTimeout(function f(){ }, 100); // fails
+
+Person.prototype = {
+  say: function say() { ... } // fails
+}
+
+Person.prototype.say = function say(){ ... }; // works
+{% endhighlight %}
 
       <p>It also means that we can&#8217;t use such common pattern as returning named function expression without an assignment:</p>
 
-<pre lang="javascript" class="prettyprint">
-
-  // Instead of this non-Safari-2x-compatible syntax:
-  (function(){
-    if (featureTest) {
-      return function f(){};
-    }
+{% highlight js %}
+// Instead of this non-Safari-2x-compatible syntax:
+(function(){
+  if (featureTest) {
     return function f(){};
-  })();
+  }
+  return function f(){};
+})();
 
-  // we should use this slightly more verbose alternative:
-  (function(){
-    var f;
-    if (featureTest) {
-      f = function f(){};
-    }
-    else {
-      f = function f(){};
-    }
-    return f;
-  })();
+// we should use this slightly more verbose alternative:
+(function(){
+  var f;
+  if (featureTest) {
+    f = function f(){};
+  }
+  else {
+    f = function f(){};
+  }
+  return f;
+})();
 
-  // or another variation of it:
-  (function(){
-    var f;
-    if (featureTest) {
-      return (f = function f(){});
-    }
+// or another variation of it:
+(function(){
+  var f;
+  if (featureTest) {
     return (f = function f(){});
-  })();
+  }
+  return (f = function f(){});
+})();
 
-  /* 
-    Unfortunately, by doing so, we introduce an extra reference to a function 
-    which gets trapped in a closure of returning function. To prevent extra memory usage, 
-    we can assign all named function expressions to one single variable.
-  */
+/*
+  Unfortunately, by doing so, we introduce an extra reference to a function
+  which gets trapped in a closure of returning function. To prevent extra memory usage,
+  we can assign all named function expressions to one single variable.
+*/
 
-  var __temp;
+var __temp;
 
-  (function(){
-    if (featureTest) {
-      return (__temp = function f(){});
-    }
+(function(){
+  if (featureTest) {
     return (__temp = function f(){});
-  })();
+  }
+  return (__temp = function f(){});
+})();
 
-  ...
+...
 
-  (function(){
-    if (featureTest2) {
-      return (__temp = function g(){});
-    }
+(function(){
+  if (featureTest2) {
     return (__temp = function g(){});
-  })();
+  }
+  return (__temp = function g(){});
+})();
 
-  /*
-    Note that subsequent assignments destroy previous references, 
-    preventing any excessive memory usage.
-  */
-</pre>
+/*
+  Note that subsequent assignments destroy previous references,
+  preventing any excessive memory usage.
+*/
+{% endhighlight %}
 
       <p>If Safari 2.x compatibility is important, we need to make sure <strong>&#8220;incompatible&#8221; constructs do not even appear in the source</strong>. This is of course quite irritating, but is definitely possible to achieve, especially when knowing the root of the problem.</p>
 
       <p>It&#8217;s also worth mentioning that declaring a function as NFE in Safari 2.x exhibits another minor glitch, where function representation does not contain function identifier:</p>
 
-<pre lang="javascript" class="prettyprint">
-  var f = function g(){};
+{% highlight js %}
+var f = function g(){};
 
-  // Notice how function representation is lacking `g` identifier
-  String(f); // function () { }
-</pre>
+// Notice how function representation is lacking `g` identifier
+String(f); // function () { }
+{% endhighlight %}
 
       <p>This is not really a big deal. As I have already mentioned before, function decompilation is something that <a href="http://perfectionkills.com/those-tricky-functions/">should not be relied upon</a> anyway. </p>
-      
+
       <h2 id="spidermonkey-peculiarity">SpiderMonkey peculiarity</h2>
-      
+
       <p>
-        We know that identifier of named function expression is only available to the local scope of a function. 
-        But how does this "magic" scoping actually happen? It appears to be very simple. 
-        When named function expression is evaluated, a <strong>special object is created</strong>. 
+        We know that identifier of named function expression is only available to the local scope of a function.
+        But how does this "magic" scoping actually happen? It appears to be very simple.
+        When named function expression is evaluated, a <strong>special object is created</strong>.
         The sole purpose of that object is to hold a property with the name corresponding to function identifier, and value corresponding to function itself.
         That object is then injected into the front of the current scope chain, and this "augmented" scope chain is then used to initialize a function.
       </p>
-      
+
       <p>
-        The interesting part here, however, is the way ECMA-262 defines this "special" object — the one that holds function identifier. 
-        Spec says that an object is created <strong>"as if by expression new Object()"</strong> which, when interpreted literally, 
-        makes this object an instance of built-in <code>Object</code> constructor. However, only one implementation — SpiderMonkey — 
+        The interesting part here, however, is the way ECMA-262 defines this "special" object — the one that holds function identifier.
+        Spec says that an object is created <strong>"as if by expression new Object()"</strong> which, when interpreted literally,
+        makes this object an instance of built-in <code>Object</code> constructor. However, only one implementation — SpiderMonkey —
         followed this specification requirement literally. In SpiderMonkey, it is possible to interfere with function local variables by augmenting <code>Object.prototype</code>:
       </p>
 
-<pre lang="javascript" class="prettyprint">
-  
-  Object.prototype.x = 'outer';
-  
-  (function(){
-    
-    var x = 'inner';
-    
-    /*
-      `foo` function here has a special object in its scope chain — to hold an identifier. That object is practically a — 
-      `{ foo: &lt;function object&gt; }`. When `x` is being resolved through the scope chain, it is first searched for in 
-      `foo`'s local context. When not found, it is searched in the next object from the scope chain. That object turns out 
-      to be the one that holds identifier — { foo: &lt;function object&gt; } and since it inherits from `Object.prototype`, 
-      `x` is found right here, and is the one that's `Object.prototype.x` (with value of 'outer'). Outer function's scope 
-      (with x === 'inner') is never even reached.
-    */
-    
-    (function foo(){
-      
-      alert(x); // alerts `outer`
-    
-    })();
+{% highlight js %}
+Object.prototype.x = 'outer';
+
+(function(){
+
+  var x = 'inner';
+
+  /*
+    `foo` function here has a special object in its scope chain — to hold an identifier. That object is practically a —
+    `{ foo: &lt;function object&gt; }`. When `x` is being resolved through the scope chain, it is first searched for in
+    `foo`'s local context. When not found, it is searched in the next object from the scope chain. That object turns out
+    to be the one that holds identifier — { foo: &lt;function object&gt; } and since it inherits from `Object.prototype`,
+    `x` is found right here, and is the one that's `Object.prototype.x` (with value of 'outer'). Outer function's scope
+    (with x === 'inner') is never even reached.
+  */
+
+  (function foo(){
+
+    alert(x); // alerts `outer`
+
   })();
-  
-</pre>
+})();
+{% endhighlight %}
 
 <p>
-  Note that later versions of SpiderMonkey actually <strong>changed this behavior</strong>, 
-  as it was probably considered a security hole. A "special" object no longer inherits from <code>Object.prototype</code>. 
+  Note that later versions of SpiderMonkey actually <strong>changed this behavior</strong>,
+  as it was probably considered a security hole. A "special" object no longer inherits from <code>Object.prototype</code>.
   You can, however, still see it in Firefox &lt;=3.
 </p>
 
 <p id="activation-object-in-blackberry-browser">
-  Another environment implementing internal object as an instance of global <code>Object</code> is <strong>Blackberry browser</strong>. 
+  Another environment implementing internal object as an instance of global <code>Object</code> is <strong>Blackberry browser</strong>.
   Only this time, it's <em>Activation Object</em> that inherits from <code>Object.prototype</code>. Note that specification actually
   doesn't codify <em>Activation Object</em> to be created "as if by expression new Object()" (as is the case with NFE's identifier holder object).
   It states that <em>Activation Object</em> is merely a specification mechanism.
@@ -810,184 +805,182 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
 
 <p>So, let's see what happens in Blackberry browser:</p>
 
-<pre lang="javascript" class="prettyprint">
-  
-  Object.prototype.x = 'outer';
-  
+{% highlight js %}
+Object.prototype.x = 'outer';
+
+(function(){
+
+  var x = 'inner';
+
   (function(){
-    
-    var x = 'inner';
-    
-    (function(){
-      
-      /*
-      When `x` is being resolved against scope chain, this local function's Activation Object is searched first. 
-      There's no `x` in it, of course. However, since Activation Object inherits from `Object.prototype`, it is 
-      `Object.prototype` that's being searched for `x` next. `Object.prototype.x` does in fact exist and so `x` 
-      resolves to its value — 'outer'. As in the previous example, outer function's scope (Activation Object) 
-      with its own x === 'inner' is never even reached.
-      */
-      
-      alert(x); // alerts 'outer'
-      
-    })();
+
+    /*
+    When `x` is being resolved against scope chain, this local function's Activation Object is searched first.
+    There's no `x` in it, of course. However, since Activation Object inherits from `Object.prototype`, it is
+    `Object.prototype` that's being searched for `x` next. `Object.prototype.x` does in fact exist and so `x`
+    resolves to its value — 'outer'. As in the previous example, outer function's scope (Activation Object)
+    with its own x === 'inner' is never even reached.
+    */
+
+    alert(x); // alerts 'outer'
+
   })();
-</pre>
+})();
+{% endhighlight %}
 
 <p>
-  This might look bizarre, but what's really disturbing is that there's even more chance of conflict with 
+  This might look bizarre, but what's really disturbing is that there's even more chance of conflict with
   already existing <code>Object.prototype</code> members:
 </p>
 
-<pre lang="javascript" class="prettyprint">
+{% highlight js %}
+(function(){
+
+  var constructor = function(){ return 1; };
+
   (function(){
-    
-    var constructor = function(){ return 1; };
-    
-    (function(){
-      
-      constructor(); // evaluates to an object `{ }`, not `1`
-      
-      constructor === Object.prototype.constructor; // true
-      toString === Object.prototype.toString; // true
-      
-      // etc.
-      
-    })();
+
+    constructor(); // evaluates to an object `{ }`, not `1`
+
+    constructor === Object.prototype.constructor; // true
+    toString === Object.prototype.toString; // true
+
+    // etc.
+
   })();
-</pre>
+})();
+{% endhighlight %}
 
 <p>
-  Solution to this Blackberry discrepancy is obvious: avoid naming variables as <code>Object.prototype</code> properties 
+  Solution to this Blackberry discrepancy is obvious: avoid naming variables as <code>Object.prototype</code> properties
   — <code>toString</code>, <code>valueOf</code>, <code>hasOwnProperty</code>, and so on.
 </p>
-      
+
       <h2 id="solution">JScript solution</h2>
 
-<pre lang="javascript" class="prettyprint">
-  var fn = (function(){
+{% highlight js %}
+var fn = (function(){
 
-    // declare a variable to assign function object to
-    var f;
+  // declare a variable to assign function object to
+  var f;
 
-    // conditionally create a named function
-    // and assign its reference to `f`
-    if (true) {
-      f = function F(){ };
-    }
-    else if (false) {
-      f = function F(){ };
-    }
-    else {
-      f = function F(){ };
-    }
+  // conditionally create a named function
+  // and assign its reference to `f`
+  if (true) {
+    f = function F(){ };
+  }
+  else if (false) {
+    f = function F(){ };
+  }
+  else {
+    f = function F(){ };
+  }
 
-    // Assign `null` to a variable corresponding to a function name
-    // This marks the function object (referred to by that identifier)
-    // available for garbage collection
-    var F = null;
+  // Assign `null` to a variable corresponding to a function name
+  // This marks the function object (referred to by that identifier)
+  // available for garbage collection
+  var F = null;
 
-    // return a conditionally defined function
-    return f;
-  })();
-</pre>
+  // return a conditionally defined function
+  return f;
+})();
+{% endhighlight %}
 
       <p>Finally, here&#8217;s how we would apply this &#8220;techinque&#8221; in real life, when writing something like a cross-browser <code>addEvent</code> function:</p>
 
-<pre lang="javascript" class="prettyprint">
+{% highlight js %}
+// 1) enclose declaration with a separate scope
+var addEvent = (function(){
 
-  // 1) enclose declaration with a separate scope
-  var addEvent = (function(){
+  var docEl = document.documentElement;
 
-    var docEl = document.documentElement;
+  // 2) declare a variable to assign function to
+  var fn;
 
-    // 2) declare a variable to assign function to
-    var fn;
+  if (docEl.addEventListener) {
 
-    if (docEl.addEventListener) {
+    // 3) make sure to give function a descriptive identifier
+    fn = function addEvent(element, eventName, callback) {
+      element.addEventListener(eventName, callback, false);
+    };
+  }
+  else if (docEl.attachEvent) {
+    fn = function addEvent(element, eventName, callback) {
+      element.attachEvent('on' + eventName, callback);
+    };
+  }
+  else {
+    fn = function addEvent(element, eventName, callback) {
+      element['on' + eventName] = callback;
+    };
+  }
 
-      // 3) make sure to give function a descriptive identifier
-      fn = function addEvent(element, eventName, callback) {
-        element.addEventListener(eventName, callback, false);
-      };
-    }
-    else if (docEl.attachEvent) {
-      fn = function addEvent(element, eventName, callback) {
-        element.attachEvent('on' + eventName, callback);
-      };
-    }
-    else {
-      fn = function addEvent(element, eventName, callback) {
-        element['on' + eventName] = callback;
-      };
-    }
+  // 4) clean up `addEvent` function created by JScript
+  //    make sure to either prepend assignment with `var`,
+  //    or declare `addEvent` at the top of the function
+  var addEvent = null;
 
-    // 4) clean up `addEvent` function created by JScript
-    //    make sure to either prepend assignment with `var`, 
-    //    or declare `addEvent` at the top of the function
-    var addEvent = null;
-
-    // 5) finally return function referenced by `fn`
-    return fn;
-  })();
-</pre>
+  // 5) finally return function referenced by `fn`
+  return fn;
+})();
+{% endhighlight %}
 
       <h2 id="alt-solution">Alternative solution</h2>
 
       <p>It&#8217;s worth mentioning that there actually exist alternative ways of having descriptive names in call stacks. Ways that don&#8217;t require one to use named function expressions. First of all, it is often possible to define function via declaration, rather than via expression. This option is only viable when you don&#8217;t need to create more than one function:</p>
 
-<pre lang="javascript" class="prettyprint">
-  var hasClassName = (function(){
+{% highlight js %}
+var hasClassName = (function(){
 
-    // define some private variables
-    var cache = { };
+  // define some private variables
+  var cache = { };
 
-    // use function declaration
-    function hasClassName(element, className) {
-      var _className = '(?:^|\\s+)' + className + '(?:\\s+|$)';
-      var re = cache[_className] || (cache[_className] = new RegExp(_className));
-      return re.test(element.className);
-    }
+  // use function declaration
+  function hasClassName(element, className) {
+    var _className = '(?:^|\\s+)' + className + '(?:\\s+|$)';
+    var re = cache[_className] || (cache[_className] = new RegExp(_className));
+    return re.test(element.className);
+  }
 
-    // return function
-    return hasClassName;
-  })();
-</pre>
+  // return function
+  return hasClassName;
+})();
+{% endhighlight %}
 
       <p>This obviously wouldn&#8217;t work when forking function definitions. Nevertheless, there&#8217;s an interesting pattern that I first seen used by <a href="http://tobielangel.com/">Tobie Langel</a>. The way it works is by <strong>defining all functions upfront using function declarations, but giving them slightly different identifiers</strong>:</p>
 
-<pre lang="javascript" class="prettyprint">
-  var addEvent = (function(){
+{% highlight js %}
+var addEvent = (function(){
 
-    var docEl = document.documentElement;
+  var docEl = document.documentElement;
 
-    function addEventListener(){
-      /* ... */
-    }
-    function attachEvent(){
-      /* ... */
-    }
-    function addEventAsProperty(){
-      /* ... */
-    }
+  function addEventListener(){
+    /* ... */
+  }
+  function attachEvent(){
+    /* ... */
+  }
+  function addEventAsProperty(){
+    /* ... */
+  }
 
-    if (typeof docEl.addEventListener != 'undefined') {
-      return addEventListener;
-    }
-    else if (typeof docEl.attachEvent != 'undefined') {
-      return attachEvent;
-    }
-    return addEventAsProperty;
-  })();
-</pre>
+  if (typeof docEl.addEventListener != 'undefined') {
+    return addEventListener;
+  }
+  else if (typeof docEl.attachEvent != 'undefined') {
+    return attachEvent;
+  }
+  return addEventAsProperty;
+})();
+{% endhighlight %}
 
       <p>While it&#8217;s an elegant approach, it has its own drawbacks. First, by using different identifiers, you lose naming consistency. Whether it&#8217;s good or bad thing is not very clear. Some might prefer to have identical names, while others wouldn&#8217;t mind varying ones; after all, different names can often &#8220;speak&#8221; about implementation used. For example, seeing &#8220;attachEvent&#8221; in debugger, would let you know that it is an <code>attachEvent</code>-based implementation of <code>addEvent</code>. On the other hand, implementation-related name might not be meaningful at all. If you&#8217;re providing an API and name &#8220;inner&#8221; functions in such way, the user of API could easily get lost in all of these implementation details. </p>
 
       <p>A solution to this problem might be to employ different naming convention. Just be careful not to introduce extra verbosity. Some alternatives that come to mind are:</p>
 
-<pre lang="javascript" class="prettyprint">
+<pre>
   `addEvent`, `altAddEvent` and `fallbackAddEvent`
-  // or 
+  // or
   `addEvent`, `addEvent2`, `addEvent3`
   // or
   `addEvent_addEventListener`, `addEvent_attachEvent`, `addEvent_asProperty`
@@ -996,36 +989,36 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       <p>Another minor issue with this pattern is increased memory consumption. By defining all of the function variations upfront, you implicitly create N-1 unused functions. As you can see, if <code>attachEvent</code> is found in <code>document.documentElement</code>, then neither <code>addEventListener</code> nor <code>addEventAsProperty</code> are ever really used. Yet, they already consume memory; memory which is never deallocated for the same reason as with JScript&#8217;s buggy named expressions — both functions are &#8220;trapped&#8221; in a closure of returning one. </p>
 
       <p>This increased consumption is of course hardly an issue. If a library such as Prototype.js was to use this pattern, there would be not more than 100-200 extra function objects created. As long as functions are not created in such way repeatedly (at runtime) but only once (at load time), you probably shouldn&#8217;t worry about it.</p>
-      
+
       <h2 id="webkit-displayName">WebKit's displayName</h2>
-      
+
       <p>A somewhat different approach was taken by WebKit team. Frustrated with poor representation of functions — both, anonymous and named — WebKit introduced "special" <code>displayName</code> property (essentially a string) that when assigned to a function is displayed in debugger/profiler in place of that function's "name". <a href="http://www.alertdebugging.com/2009/04/29/building-a-better-javascript-profiler-with-webkit/">Francisco Tolmasky explains in details</a> the rationale and implementation of this solution.</p>
-      
+
       <h2 id="future-considerations">Future considerations</h2>
-      
+
       <p>Upcoming version of ECMAScript — <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm" title="Standard ECMA-262">ECMA-262, 5th edition</a> — introduces so-called <strong>strict mode</strong>. The purpose of strict mode is to disallow certain parts of the language which are considered to be fragile, unreliable or dangerous. One of such parts is <code>arguments.callee</code>, "banned" presumably due to security concerns. When in strict mode, access to <code>arguments.callee</code> results in <code>TypeError</code> (see section 10.6). The reason I'm bringing up strict mode is because inability to use <code>arguments.callee</code> for recursion in 5th edition will most likely result in increased use of named function expressions. Understanding their semantics and bugs will become even more important.</p>
-      
-<pre lang="javascript" class="prettyprint">
-  // Before, you could use arguments.callee
-  (function(x) {
-    if (x &lt;= 1) return 1;
-    return x * arguments.callee(x - 1);
-  })(10);
-  
-  // In strict mode, an alternative solution is to use named function expression
-  (function factorial(x) {
-    if (x &lt;= 1) return 1;
-    return x * factorial(x - 1);
-  })(10);
-  
-  // or just fall back to slightly less flexible function declaration
-  function factorial(x) {
-    if (x &lt;= 1) return 1;
-    return x * factorial(x - 1);
-  }
-  factorial(10);
-</pre>
-      
+
+{% highlight js %}
+// Before, you could use arguments.callee
+(function(x) {
+  if (x &lt;= 1) return 1;
+  return x * arguments.callee(x - 1);
+})(10);
+
+// In strict mode, an alternative solution is to use named function expression
+(function factorial(x) {
+  if (x &lt;= 1) return 1;
+  return x * factorial(x - 1);
+})(10);
+
+// or just fall back to slightly less flexible function declaration
+function factorial(x) {
+  if (x &lt;= 1) return 1;
+  return x * factorial(x - 1);
+}
+factorial(10);
+{% endhighlight %}
+
       <h2 id="credits">Credits</h2>
 
       <p><strong><em>Richard Cornford</em></strong>, for being one of the first people <a href="http://groups.google.com/group/comp.lang.javascript/msg/5b508b03b004bce8">to explain JScript bug with named function expressions</a>. Richard explains most of the bugs mentioned in this article. I highly recommend reading his explanation. I would also like to thank <strong><em>Yann-Erwan Perio</em></strong> and <strong><em>Douglas Crockford</em></strong> for <a href="http://groups.google.com/group/comp.lang.javascript/msg/03d53d114d176323">mentioning and discussing NFE issues in comp.lang.javascript</a> as far back as in 2003.</p>
@@ -1033,23 +1026,44 @@ Finally, what appears to be a bug in earlier Gecko-based implementations (presen
       <p><strong><em>John-David Dalton</em></strong>, for giving useful suggestions about &#8220;final solution&#8221;.</p>
 
       <p><strong><em>Tobie Langel</em></strong>, for ideas presented in &#8220;alternative solution&#8221;.</p>
-      
+
       <p><strong><em>Garrett Smith</em></strong> and <strong><em>Dmitry A. Soshnikov</em></strong> for various additions and corrections.</p>
-      
+
       <p>A <a href="http://www.cn-cuckoo.com/wordpress/wp-content/uploads/2009/12/named-function-expressions-demystified.html">Chinese translation of this article</a> is available.</p>
       <p>For an extensive explanation of functions in ECMAScript in Russian, see <a href="http://dmitrysoshnikov.com/ecmascript/ru-chapter-5-functions/">this article by Dmitry A. Soshnikov</a>.</p>
-      
-      <p style="margin-top: 2em; background: #ffc; float: left; padding: 0.5em;">
-        Have suggestions or corrections? 
-        Feel free to <a href="http://perfectionkills.com/named-function-expressions-demystified/" title="">comment on a blog post</a> 
-        or <a href="mailto:kangax@gmail.com" title=" ">drop me an email</a>.
-        <br>
-        This <a href="http://github.com/kangax/nfe/tree/master" title="this article on github">article is also versioned on github</a>, where you can track its changes.
-      </p>
-      <p style="float: right; margin-top: 2em; padding: 0.5em;">
-        Created: <span class="dtstart">June 17, 2009</span> Last modified: <span class="dtstart">June 8, 2010</span>
-      </p>
+
+      <div class="footer clearfix">
+        <div class="row">
+          <div class="col-md-7">
+            <p class="bg-info">
+              Have suggestions or corrections?
+              Feel free to <a href="http://perfectionkills.com/named-function-expressions-demystified/">comment on a blog post</a>
+              or <a href="mailto:kangax@gmail.com">drop me an email</a>.
+              <br>
+              This <a href="https://github.com/kangax/nfe/tree/master" title="this article on GitHub">article is also versioned on GitHub</a>, where you can track its changes.
+            </p>
+          </div>
+          <div class="col-md-4 col-md-offset-1 footer-right">
+            <p>
+              Created: <span class="bg-info"><strong>June 17, 2009</strong></span> Last modified: <span class="bg-info"><strong>June 8, 2010</strong></span>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-    <script src="prettify.js" type="text/javascript"></script>
+
+    <script>
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-1128111-17']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        document.getElementsByTagName('head')[0].appendChild(ga);
+      })();
+    </script>
   </body>
 </html>

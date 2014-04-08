@@ -1,0 +1,4 @@
+markdown:   kramdown
+pygments:   true
+encoding:   UTF-8
+exclude:    ["bootstrap-info.md", "README.md"]

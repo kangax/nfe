@@ -1,0 +1,33 @@
+h1 .small {
+  display: inline-block;
+  line-height: 1.8;
+}
+
+.well.bg-success {
+  background-color: #dfd;
+}
+
+.highlight pre {
+  padding: 15px;
+  overflow-x: auto;
+  word-wrap: normal;
+  white-space: pre;
+}
+
+pre code {
+  overflow-x: auto;
+  word-wrap: normal;
+  white-space: pre;
+}
+
+.footer {
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+@media (min-width: 992px) {
+  h1 .small,
+  .footer-right {
+     float: right;
+  }
+}
