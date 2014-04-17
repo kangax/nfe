@@ -22,7 +22,7 @@
 
       <div class="page-header">
         <h1>Named function expressions demystified
-          <span class="small"><em>by <a href="http://perfectionkills.com/">Juriy "kangax" Zaytsev</a></em>
+          <span class="small"><em>by <a href="http://perfectionkills.com/">Juriy "kangax" Zaytsev</a></em></span>
         </h1>
       </div>
 
@@ -258,7 +258,7 @@ if (true) {
   // overwritting with function statement
   function foo(){ return 2; }
 }
-foo(); // 1 in FF&lt;= 3, 2 in FF3.5 and later
+foo(); // 1 in FF<= 3, 2 in FF3.5 and later
 
 // however, this doesn't happen when overwriting function expression
 var foo = function(){ return 1; };
@@ -287,17 +287,17 @@ var contains = (function() {
 
   if (typeof docEl.compareDocumentPosition != 'undefined') {
     return function(el, b) {
-      return (el.compareDocumentPosition(b) &amp; 16) !== 0;
+      return (el.compareDocumentPosition(b) & 16) !== 0;
     };
   }
   else if (typeof docEl.contains != 'undefined') {
     return function(el, b) {
-      return el !== b &amp;&amp; el.contains(b);
+      return el !== b && el.contains(b);
     };
   }
   return function(el, b) {
     if (el === b) return false;
-    while (el != b &amp;&amp; (b = b.parentNode) != null);
+    while (el != b && (b = b.parentNode) != null);
     return el === b;
   };
 })();
@@ -600,7 +600,7 @@ function createFn(){
 }
 
 var arr = [ ];
-for (var i=0; i&lt;10000; i++) {
+for (var i=0; i<10000; i++) {
   arr[i] = createFn();
 }
 {% endhighlight %}
@@ -631,7 +631,7 @@ for (var i=0; i&lt;10000; i++) {
       <p>When encountering function expression in a certain context, Safari 2.x fails to parse the program entirely. It doesn&#8217;t throw any errors (such as <code>SyntaxError</code> ones). It simply bails out:</p>
 
 {% highlight js %}
-(function f(){})(); // &lt;== NFE
+(function f(){})(); // <== NFE
 alert(1); // this line is never reached, since previous expression fails the entire program
 {% endhighlight %}
 
@@ -775,9 +775,9 @@ Object.prototype.x = 'outer';
 
   /*
     `foo` function here has a special object in its scope chain — to hold an identifier. That object is practically a —
-    `{ foo: &lt;function object&gt; }`. When `x` is being resolved through the scope chain, it is first searched for in
+    `{ foo: <function object> }`. When `x` is being resolved through the scope chain, it is first searched for in
     `foo`'s local context. When not found, it is searched in the next object from the scope chain. That object turns out
-    to be the one that holds identifier — { foo: &lt;function object&gt; } and since it inherits from `Object.prototype`,
+    to be the one that holds identifier — { foo: <function object> } and since it inherits from `Object.prototype`,
     `x` is found right here, and is the one that's `Object.prototype.x` (with value of 'outer'). Outer function's scope
     (with x === 'inner') is never even reached.
   */
@@ -1001,19 +1001,19 @@ var addEvent = (function(){
 {% highlight js %}
 // Before, you could use arguments.callee
 (function(x) {
-  if (x &lt;= 1) return 1;
+  if (x <= 1) return 1;
   return x * arguments.callee(x - 1);
 })(10);
 
 // In strict mode, an alternative solution is to use named function expression
 (function factorial(x) {
-  if (x &lt;= 1) return 1;
+  if (x <= 1) return 1;
   return x * factorial(x - 1);
 })(10);
 
 // or just fall back to slightly less flexible function declaration
 function factorial(x) {
-  if (x &lt;= 1) return 1;
+  if (x <= 1) return 1;
   return x * factorial(x - 1);
 }
 factorial(10);
@@ -1045,7 +1045,7 @@ factorial(10);
           </div>
           <div class="col-md-4 col-md-offset-1 footer-right">
             <p>
-              Created: <span class="bg-info"><strong>June 17, 2009</strong></span> Last modified: <span class="bg-info"><strong>April 17, 2014</strong></span>
+              Created: <span class="bg-info"><strong>June 17, 2009</strong></span> Last modified: <span class="bg-info"><strong>{{ site.time | date: '%B %d, %Y' }}</strong></span>
             </p>
           </div>
         </div>
