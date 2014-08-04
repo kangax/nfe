@@ -161,7 +161,7 @@ foo();
           not <em>SourceElement</em>s, which <em>FunctionDeclaration</em> is.
           If we look at production rules carefully, we can see that the only way <em>Expression</em> is allowed directly within <em>Block</em>
           is when it is part of <em>ExpressionStatement</em>. However, <em>ExpressionStatement</em> is explicitly defined
-          <strong>to not begin with "function" keyword</strong>, and this is exactly why <em>FunctionExpression</em> cannot appear directly within a <em>Statement</em> or <em>Block</em> (note that <em>Block</em> is merely a list of <em>Statement</em>s).
+          <strong>to not begin with "function" keyword</strong>, and this is exactly why <em>FunctionDeclaration</em> cannot appear directly within a <em>Statement</em> or <em>Block</em> (note that <em>Block</em> is merely a list of <em>Statement</em>s).
         </p>
         <p>
           Because of these restrictions, whenever function appears directly in a block (such as in the previous example) it should actually be
